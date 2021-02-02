@@ -4,7 +4,6 @@ hr {
   border-top    : none;
 }
 
-svg {
+.error svg, .warning svg, .info svg, .success svg {
   margin : 0 10px 0 0;
 }
-

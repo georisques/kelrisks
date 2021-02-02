@@ -12,27 +12,21 @@
                        size="lg"
                        v-show="!opened"/>
     <p @click="openCloseContact()"
-       class="section__subtitle">Une remarque? Une Erreur?</p>
-    <textarea id="contactContent"
-              title="Remarque/Suggestion/Problème?"></textarea>
-    <kr-input label="Vous souhaitez être recontacté ?"
-              name="contactMail"
-              placeholder="jean.dupont@gmail.com"/>
-    <button @click="sendMail()"
-            class="button">Envoyer
-    </button>
+       class="section__subtitle">Besoin d'aide ?</p>
+      <div class="textarea">
+        <a v-bind:href="url" target="_blank" rel="noopener">Visitez le site assistance.brgm.fr</a>
+      </div>
+
   </div>
 </template>
 
 <script>
 import JQuery from 'jquery'
-import KrInput from "../ui/KrInput";
 
 let $ = JQuery
 
 export default {
   name: 'Contact',
-  components: {KrInput},
   props: {
     timeout: {
       type: Number,
@@ -43,6 +37,7 @@ export default {
     opened: false,
     timesUp: false,
     countDownInstance: null,
+    url: `https://assistance.${window.DOMAIN_MATOMO}.fr/aide/Georisques`,
     env: {
       basePath: process.env.VUE_APP_FRONT_PATH,
       startTime: (new Date()).getTime()
@@ -67,20 +62,6 @@ export default {
       if (this.timesUp) {
         this.openContact()
       }
-    },
-    sendMail () {
-      fetch(this.env.basePath + 'mail', {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({content: $('#contactContent').val(), mail: $('#contactMail').val()})
-      }).then(stream => stream.json())
-              .then(() => {
-                this.closeContact()
-                $('#contactContent').val('')
-                // console.log(value)
-              })
     }
   },
   mounted () {
@@ -94,7 +75,7 @@ export default {
 <style scoped>
   #contact {
     transition : bottom 0.33s ease;
-    width      : 400px;
+    width      : 300px;
     position   : fixed;
     bottom     : -1px;
     right      : 10px;
@@ -104,7 +85,7 @@ export default {
   }
 
   #contact.hidden {
-    bottom : -235px;
+    bottom : -70px;
   }
 
   #contact .close {
@@ -120,7 +101,7 @@ export default {
     margin-top    : -10px;
   }
 
-  #contact textarea {
+  #contact .textarea {
     margin-bottom : 10px;
     resize        : none;
   }

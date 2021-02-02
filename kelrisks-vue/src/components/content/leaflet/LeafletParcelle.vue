@@ -2,6 +2,7 @@
     <div class="leaflet">
         <l-map :center="center"
                :zoom="18"
+               :options="{attributionControl: false}"
                ref="leafletParcelles">
             <l-tile-layer :url="url"/>
             <l-geo-json :geojson="parseJSONMap(data.parcelles)"
@@ -56,17 +57,19 @@ export default {
         },
         updateParcelles (x, y) {
 
-            fetchWithError(this.env.apiPath + "cadastre/" + x + "/" + y, null, 1000 * 10)
-                .then(stream => stream.json())
-                .then(data => {
-
-                    this.data = {
-                        parcelles: data.entity
+            fetchWithError(this.env.apiPath + "cadastre/" + x + "/" + y, null, 1000 * 10).then(r => {
+                   if (r.status !== 200) {
+                        this.$refs.searchErrors.sendError("Le service de recherche n'est pas disponible pour le moment, veuillez réessayer plus tard.")
+                        return
+                    }             
+                    r.json().then(data => {
+                        this.data = {
+                            parcelles: data
+                        }
                     }
-                })
+            )})
         },
         initLayerClick (layer) {
-
             if (this.selectedList.includes(layer.id)) {
                 layer.setStyle({fillColor: '#FF0000', color: '#FF0000'})
                 layer.selected = true
@@ -166,7 +169,11 @@ export default {
             })
         })
 
-        this.updateParcelles(this.center[0], this.center[1])
+        // pour eviter au demarrage de l'appli d'appeler le cadastre avec 0,0
+        let y = this.center[1]
+        if(y != 0){
+            this.updateParcelles(this.center[0], y)
+        }
     }
 }
 </script>

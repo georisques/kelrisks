@@ -50,7 +50,12 @@
                      :parcelle="parcelle"
                      :data="leafletData"
                      :max-zoom="leafletMaxZoom"
-                     :min-zoom="leafletMinZoom"/>
+                     :min-zoom="leafletMinZoom"
+                     :wms-layer="leafletWmsLayer"
+                     :wms-servers="leafletWmsServers"
+                     :codes-communes="leafletCodesCommunes"
+                     :bbox-risque="leafletBboxRisque"
+                     />
         </div>
     </div>
 </template>
@@ -106,11 +111,29 @@ export default {
         type: [String, Array],
         default: undefined
       },
+      // nom de la couche carto
+      leafletWmsLayer: {
+          type: String,
+          default: null
+      },
+      // urls des serveurs WMS de recette et prod
+      leafletWmsServers: {
+          type: Object,
+          default: () => null
+      },
       leafletMaxZoom: {
         default: () => 18
       },
       leafletMinZoom: {
         default: () => null
+      },
+      leafletCodesCommunes: {
+        type: Array,
+        default: () => []
+      },
+      leafletBboxRisque: {
+        type: Array,
+        default: () => []
       }
     },
     methods: {},

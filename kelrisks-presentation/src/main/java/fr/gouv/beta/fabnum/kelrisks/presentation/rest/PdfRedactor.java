@@ -3,7 +3,9 @@ package fr.gouv.beta.fabnum.kelrisks.presentation.rest;
 import fr.gouv.beta.fabnum.commun.metier.util.QRCodeUtils;
 import fr.gouv.beta.fabnum.commun.metier.util.SecurityHelper;
 import fr.gouv.beta.fabnum.kelrisks.facade.avis.AvisDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.AleaDTO;
 import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.CommuneDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.FamilleAleaDTO;
 import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.InstallationClasseeDTO;
 import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.InstallationNucleaireDTO;
 import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.PlanPreventionRisquesGasparDTO;
@@ -45,8 +47,7 @@ public class PdfRedactor {
     private static final int    AVAILABLE_RISQUE_PRINCIPAL_OVERFLOW_LINES = 12;
     @Value("${kelrisks.app.back.local.path}")
     String                   localAppPath;
-    @Value("${kelrisks.app.back.path}")
-    String                   appPath;
+
     @Autowired
     IGestionCommuneFacade    gestionCommuneFacade;
     @Autowired
@@ -91,7 +92,7 @@ public class PdfRedactor {
         }
     }
     
-    public void ajouterQRCode(Document htmlDocument, AvisDTO avisDTO) throws Exception {
+    public void ajouterQRCode(Document htmlDocument, AvisDTO avisDTO, String appPath) throws Exception {
     
         String encodedText = securityHelper.encodeAndPrependIVSalt(avisDTO.toString());
     
@@ -122,7 +123,7 @@ public class PdfRedactor {
         while (matcher.find()) {
             String name  = matcher.group(1);
             String value = matcher.group(2);
-            System.out.println(name);
+            
             Elements inputs = htmlDocument.select("input[name=" + name + "]");
             for (Element input : inputs) {
                 if (input.val().equals(value)) {
@@ -142,7 +143,7 @@ public class PdfRedactor {
         Element tbody;
         double  lines = 1;
         
-        page.append("<div><h2>ANNEXE 3 : SITUATION DU RISQUE DE POLLUTION DES SOLS DANS UN RAYON DE 500M AUTOUR DE VOTRE BIEN</h2></div>");
+        page.append("<div><h2>ANNEXE 3 : SITUATION DU RISQUE DE POLLUTION DES SOLS DANS UN RAYON DE 500 M AUTOUR DE VOTRE BIEN</h2></div>");
         
         if (avisDTO.getInstallationClasseeRayonParcelleDTOs().size() > 0) {
             page.append("<p>Base des installations classées soumises à autorisation ou à enregistrement</p>");
@@ -401,7 +402,7 @@ public class PdfRedactor {
         if (hasPollutionNonReglementaire(avisDTO)) {
             addRisquePrincipal(htmlDocument,
                                "POLLUTION_NON_REG",
-                               "POLLUTION DES SOLS (500m)",
+                               "POLLUTION DES SOLS (500 m)",
                                localAppPath + "/pictogrammes_risque/ic_basias_bleu.png",
                                "<p>Les pollutions des sols peuvent présenter un risque sanitaire lors des changements d’usage des sols (travaux, aménagements changement d’affectation des terrains) " +
                                "si elles ne sont pas prises en compte dans le cadre du projet.<br/></p><p>Dans un rayon de 500 m autour de votre parcelle, sont identifiés :</p>" +
@@ -441,7 +442,7 @@ public class PdfRedactor {
                                "CANALISATIONS",
                                "CANALISATIONS TRANSPORT DE MATIÈRES DANGEREUSES",
                                localAppPath + "/pictogrammes_risque/ic_reseaux_canalisation_bleu.png",
-                               "<p>Une canalisation de matières dangereuses (gaz naturel, produits pétroliers ou chimiques) est située dans un rayon de 500m autour de votre parcelle. La carte " +
+                               "<p>Une canalisation de matières dangereuses (gaz naturel, produits pétroliers ou chimiques) est située dans un rayon de 500 m autour de votre parcelle. La carte " +
                                "représente les implantations présentes autour de votre localisation. Il convient de rechercher une information plus précise en se rendant en mairie.</p>");
         }
     
@@ -491,8 +492,11 @@ public class PdfRedactor {
                 page = addPage(htmlDocument);
             }
         
-            page.append("<h3>" + planPreventionRisquesDTO.getAlea().getFamilleAlea().getLibelle().toUpperCase() + "</h3/>\n" +
-                        "<p>Rappel du risque : " + planPreventionRisquesDTO.getAlea().getFamilleAlea().getLibelle() + ", " + planPreventionRisquesDTO.getAlea().getLibelle() + ".</p>\n" +
+            AleaDTO alea = planPreventionRisquesDTO.getAlea();
+            if(alea != null) {
+            	FamilleAleaDTO familleAlea = alea.getFamilleAlea();
+                page.append("<h3>" + (familleAlea != null ? familleAlea.getLibelle().toUpperCase() : "") + "</h3/>\n" +
+                        "<p>Rappel du risque : " + (familleAlea != null ? familleAlea.getLibelle() : "") + ".</p>\n" +
                         "<div class=\"text_wrapper\"><b>Le bien est il concerné par des prescriptions de travaux ?</b></div>\n" +
                         "<div class=\"input_wrapper\">\n" +
                         "    <label><input value=\"1\" name=\"pre_" + planPreventionRisquesDTO.getIdGaspar() + "\" type=\"checkbox\"><span><img src=\"" + localAppPath + "/check_box" +
@@ -507,6 +511,8 @@ public class PdfRedactor {
                         "    <label><input value=\"0\" name=\"tra_" + planPreventionRisquesDTO.getIdGaspar() + "\" type=\"checkbox\"><span><img src=\"" + localAppPath + "/check_box" +
                         ".svg\"/></span>Non</label>\n" +
                         "</div>\n");
+            }
+
         
             numberOfPpr++;
         }
@@ -588,7 +594,8 @@ public class PdfRedactor {
     private boolean hasTypePPR(AvisDTO avisDTO, String type) {
         
         for (PlanPreventionRisquesGasparDTO plan : avisDTO.getPlanPreventionRisquesDTOs()) {
-            if (plan.getAlea().getFamilleAlea().getFamillePPR().getCode().equals(type)) { return true; }
+        	AleaDTO alea = plan.getAlea();
+            if (alea != null && alea.getFamilleAlea() != null && alea.getFamilleAlea().getFamillePPR().getCode().equals(type)) { return true; }
         }
         return false;
     }
@@ -611,8 +618,9 @@ public class PdfRedactor {
                         "devez consulter le PPR auprès de votre commune ou sur le site de votre préfecture..");
             if (hasTypePPR(avisDTO, "PPRN")) {
                 page.append("<p>Si votre bien est concerné par une obligation de travaux, vous pouvez bénéficier d'une aide de l'État, dans le cadre du Fonds de prévention des risques naturels " +
-                            "majeurs (FPRNM). Pour plus de renseignements, contacter la direction départementale des territoires (DDT) de votre département.</p>");
+                            "majeurs (FPRNM).</p>");
             }
+            page.append("<p>Pour plus de renseignements, contacter la direction départementale des territoires (DDT) de votre département ou votre Direction de l'environnement, de l'aménagement et du logement (DEAL), si vous êtes en Outre-mer.</p>");
             page.append("<p>Pour se préparer et connaître les bons réflexes en cas de survenance du risque, consulter le dossier d'information communal sur les risques majeurs (DICRIM) auprès de " +
                         "votre commune.</p>");
         }
@@ -733,28 +741,52 @@ public class PdfRedactor {
         page.append("<div id=\"risque-principaux\"><h2>RISQUES FAISANT L'OBJET D'UNE OBLIGATION D'INFORMATION AU TITRE DE L'IAL</h2></div>");
     
         for (PlanPreventionRisquesGasparDTO ppr : avisDTO.getPlanPreventionRisquesDTOs()) {
-        
-            addRisquePrincipal(htmlDocument,
-                               ppr.getAlea().getFamilleAlea().getCode(),
-                               ppr.getAlea().getFamilleAlea().getLibelle().toUpperCase(),
-                               localAppPath + "/pictogrammes_risque/" + getLogoRisque(ppr.getAlea().getFamilleAlea().getCode()) + ".png",
+        	AleaDTO alea = ppr.getAlea();
+        	if(alea != null) {
+        		if(alea.getFamilleAlea() != null) {
+        			FamilleAleaDTO familleAlea = alea.getFamilleAlea();
+        			
+        			addRisquePrincipal(htmlDocument, familleAlea.getCode(),
+        					familleAlea.getLibelle().toUpperCase(),
+                            localAppPath + "/pictogrammes_risque/" + getLogoRisque(familleAlea.getCode()) + ".png",
+                            "<p>" + (!ppr.isExistsInGeorisque() && !ppr.isExistsInGpu() ? "La commune est située" : "L’immeuble est situé") +
+                            " dans le périmètre d’un " + familleAlea.getFamillePPR().getLibelle() + " de type " + familleAlea.getLibelle() +
+                            (ppr.getDateApprobation() != null ? ", approuvé le " + sdf.format(ppr.getDateApprobation()) : "") +
+                            (ppr.getDatePrescription() != null ? ", prescrit le " + sdf.format(ppr.getDatePrescription()) : "") +
+                            (ppr.getDateApplicationAnticipee() != null ? ", anticipé le " + sdf.format(ppr.getDateApplicationAnticipee()) : "") +
+                            ".<br/>" +
+                            (ppr.getDateApprobation() != null ? "Un PPR approuvé est un PPR définitivement adopté. " : "") +
+                            (ppr.getDatePrescription() != null ? "Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d’élaboration." :
+                             "") +
+                            (ppr.getDateApplicationAnticipee() != null ? "Un PPR anticipé est un PPR non encore approuvé mais dont les règles sont  déjà à appliquer, par anticipation." : "") +
+                            "<br/><br/>" +
+                            (familleAlea.getFamillePPR().getCode().equals("PPRT") ?
+                             "Le plan de prévention des risques technologiques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d’urbanisme" +
+                             " héritées du passé et de mieux encadrer l’urbanisation future autour du site." :
+                             "Le plan de prévention des risques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d'urbanisme héritées du " +
+                             "passé et de mieux encadrer l'urbanisation future autour du site.") +
+                            "</p>"
+                    );
+        		} else {
+        			// TODO : en theorie un alea a toujours une famille d'alea, il faudra peut etre virer cette partie
+        			addRisquePrincipal(htmlDocument, "",
+              				 "",
+                               localAppPath + "/pictogrammes_risque/" + getLogoRisque(null) + ".png",
                                "<p>" + (!ppr.isExistsInGeorisque() && !ppr.isExistsInGpu() ? "La commune est située" : "L’immeuble est situé") +
-                               " dans le périmètre d’un " + ppr.getAlea().getFamilleAlea().getFamillePPR().getLibelle() + " de type " + ppr.getAlea().getFamilleAlea().getLibelle() + " - " + ppr.getAlea().getLibelle() +
+                               " dans le périmètre d'un aléa - " + alea.getLibelle() +
                                (ppr.getDateApprobation() != null ? ", approuvé le " + sdf.format(ppr.getDateApprobation()) : "") +
                                (ppr.getDatePrescription() != null ? ", prescrit le " + sdf.format(ppr.getDatePrescription()) : "") +
                                (ppr.getDateApplicationAnticipee() != null ? ", anticipé le " + sdf.format(ppr.getDateApplicationAnticipee()) : "") +
                                ".<br/>" +
-                               (ppr.getDateApprobation() != null ? "Un PPR approuvé est un PPR définitivement adopté." : "") +
+                               (ppr.getDateApprobation() != null ? "Un PPR approuvé est un PPR définitivement adopté. " : "") +
                                (ppr.getDatePrescription() != null ? "Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d’élaboration." :
                                 "") +
                                (ppr.getDateApplicationAnticipee() != null ? "Un PPR anticipé est un PPR non encore approuvé mais dont les règles sont  déjà à appliquer, par anticipation." : "") +
-                               "<br/><br/>" +
-                               (ppr.getAlea().getFamilleAlea().getFamillePPR().getCode().equals("PPRT") ?
-                                "Le plan de prévention des risques technologiques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d’urbanisme" +
-                                " héritées du passé et de mieux encadrer l’urbanisation future autour du site." :
-                                "Le plan de prévention des risques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d'urbanisme héritées du " +
-                                "passé et de mieux encadrer l'urbanisation future autour du site.") +
-                               "</p>");
+                               "<br/><br/>" 
+                     );        			
+        		}
+        		 
+        	}
         }
         
         if (hasSismicite(avisDTO)) {
@@ -799,9 +831,9 @@ public class PdfRedactor {
                                                                                              "</br>Installation(s) concernée(s)  : <br/>" +
                                                                                              "" + getLibelleInstallationsClassees(avisDTO) + "</p>" : "") +
                                (avisDTO.getSecteurInformationSolSurParcelleDTOs().size() > 0 ? "<p>- La parcelle est située en secteur d’information sur les sols : <br/>" +
-                                                                                               "" + getLibelleSecteursInformation(avisDTO) + "</p>" : "") +
-                               (false ? "- La parcelle est affectée d’une servitude d’utilité publique au titre des installations classées au titre du L 515-12 du " +
-                                        "code de l’environnement." : ""));
+                                                                                               "" + getLibelleSecteursInformation(avisDTO) + "</p>" : ""));
+//                               (false ? "- La parcelle est affectée d’une servitude d’utilité publique au titre des installations classées au titre du L 515-12 du " +
+//                                        "code de l’environnement." : ""));
         }
         
         if (avisDTO.getZonePlanExpositionBruit() != null) {
@@ -815,7 +847,7 @@ public class PdfRedactor {
                                (avisDTO.getZonePlanExpositionBruit().equals("B") ? "<p>Le niveau d’exposition au bruit de la parcelle est fort (zone B en orange). La zone B est principalement " +
                                                                                    "inconstructible.</p>" : "") +
                                (avisDTO.getZonePlanExpositionBruit().equals("C") ? "<p>Le niveau d’exposition au bruit de la parcelle est modéré (zone C en jaune). Certaines constructions sont " +
-                                                                                   "autorisées sous conditions.</p>" : "") +
+                                                                                   "autorisées sous conditions et sous réserve de mesures d’isolation acoustique.</p>" : "") +
                                (avisDTO.getZonePlanExpositionBruit().equals("D") ? "<p>Le niveau d’exposition au bruit de la parcelle est faible (zone D en verte). Dans la zone D, les nouveaux " +
                                                                                    "logements sont autorisés à condition qu’ils fassent l’objet d’une isolation phonique.</p>" : ""),
                                new Legend("#840505", "A - très fort"),
@@ -947,18 +979,34 @@ public class PdfRedactor {
         return body.select(".page .content").last();
     }
     
-    private String getLogoRisque(String codeAlea) {
-        
-        switch (codeAlea) {
-            case "11":
-                return "ic_inondation_bleu";
-            case "12":
-                return "ic_terre_bleu";
-            case "21":
-                return "ic_industrie_bleu";
-            default:
-                return "ic_basias_bleu";
-        }
+    private String getLogoRisque(String codeFamilleAlea) {
+    	if(codeFamilleAlea == null) {
+    		// TODO : ce cas n'est pas "normal" ?
+            return "ic_multirisque_bleu";
+    	} else {
+            switch (codeFamilleAlea) {
+	        case "11" :
+	            return "ic_inondation_bleu";
+	        case "12" :
+	            return "ic_terre_bleu";
+	        case "13" :
+	            return "ic_seisme_bleu";
+	        case "14" :
+	            return "ic_r_montagne_bleu";
+	        case "15" :
+	            return "ic_volcan_bleu";
+	        case "16" :
+	            return "ic_feu_foret_bleu";
+	        case "17" :
+	            return "ic_meteo_bleu";
+	        case "18" :
+	            return "ic_rn_bleu";
+	        case "21" :
+	            return "ic_industrie_bleu";
+	        default :
+	            return "ic_multirisque_bleu";
+            }
+    	}
     }
     
     private String getLibelleInstallationsNucleaires(AvisDTO avisDTO) {
@@ -1013,7 +1061,8 @@ public class PdfRedactor {
     private boolean hasPPRi(AvisDTO avisDTO) {
         
         for (PlanPreventionRisquesGasparDTO plan : avisDTO.getPlanPreventionRisquesDTOs()) {
-            if (plan.getAlea().getFamilleAlea().getCode().equals("11")) {
+        	AleaDTO alea = plan.getAlea();
+            if (alea != null && alea.getFamilleAlea() != null && alea.getFamilleAlea().getCode().equals("11")) {
                 return true; // ('11', 'Inondation');
             }
         }

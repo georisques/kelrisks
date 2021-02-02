@@ -6,12 +6,12 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasiasSurParcelleDTOs.length
+        avis.numberOf = value.siteIndustrielBasiasSurParcelleDTOs.length
         if (avis.numberOf === 0) {
             avis.lib = 'N’est pas référencée dans l\'inventaire des sites ayant accueilli par le passé une activité susceptible d\'avoir pu généré une pollution des sols (BASIAS).'
         } else {
             avis.lib = 'est référencée dans l\'inventaire des sites ayant accueilli par le passé une activité susceptible d\'avoir pu généré une pollution des sols (BASIAS).'
-            value.entity.siteIndustrielBasiasSurParcelleDTOs.forEach(function (element) {
+            value.siteIndustrielBasiasSurParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -24,12 +24,12 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasiasProximiteParcelleDTOs.length
+        avis.numberOf = value.siteIndustrielBasiasProximiteParcelleDTOs.length
         if (avis.numberOf !== 0) {
             avis.lib = avis.numberOf === 1
                 ? 'dans le voisinage immédiat de la (ou des) parcelle(s), un site  ayant accueilli par le passé une activité susceptible d\'avoir pu générer une pollution des sols (BASIAS). Vous pouvez consulter la fiche consacrée à cette activité industrielle à l\'adresse suivante : '
                 : 'dans le voisinage immédiat de la (ou des) parcelle(s), des sites  ayant accueilli par le passé une activité susceptible d\'avoir pu générer une pollution des sols (BASIAS). Vous pouvez consulter les fiches consacrée à cette activité industrielle à l\'adresse suivante : '
-            value.entity.siteIndustrielBasiasProximiteParcelleDTOs.forEach(function (element) {
+            value.siteIndustrielBasiasProximiteParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -42,10 +42,10 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasiasParRaisonSocialeDTOs.length
+        avis.numberOf = value.siteIndustrielBasiasParRaisonSocialeDTOs.length
         if (avis.numberOf !== 0) {
-            avis.lib = 'un site dont la localisation est imprécise mais ayant potentiellement appartenu au même propriétaire (' + value.entity.nomProprietaire + ') : '
-            value.entity.siteIndustrielBasiasParRaisonSocialeDTOs.forEach(function (element) {
+            avis.lib = 'un site dont la localisation est imprécise mais ayant potentiellement appartenu au même propriétaire (' + value.nomProprietaire + ') : '
+            value.siteIndustrielBasiasParRaisonSocialeDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -57,9 +57,9 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasiasRayonParcelleDTOs.length
+        avis.numberOf = value.siteIndustrielBasiasRayonParcelleDTOs.length
         if (avis.numberOf > 0) {
-            value.entity.siteIndustrielBasiasRayonParcelleDTOs.forEach(function (element) {
+            value.siteIndustrielBasiasRayonParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -72,9 +72,9 @@ export default {
             lib: 'Liste des sites BASIAS non géoréférencés',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasiasNonGeorerenceesDTOs.length
+        avis.numberOf = value.siteIndustrielBasiasNonGeorerenceesDTOs.length
         if (avis.numberOf !== 0) {
-            value.entity.siteIndustrielBasiasNonGeorerenceesDTOs.forEach(function (element) {
+            value.siteIndustrielBasiasNonGeorerenceesDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -86,12 +86,12 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasolSurParcelleDTOs.length
+        avis.numberOf = value.siteIndustrielBasolSurParcelleDTOs.length
         if (avis.numberOf === 0) {
             avis.lib = 'N’est pas référencée dans l\'inventaire des sites pollués BASOL.'
         } else {
             avis.lib = 'Est référencée dans l\'inventaire des sites pollués BASOL.'
-            value.entity.siteIndustrielBasolSurParcelleDTOs.forEach(function (element) {
+            value.siteIndustrielBasolSurParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -107,9 +107,9 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasolRayonParcelleDTOs.length
+        avis.numberOf = value.siteIndustrielBasolRayonParcelleDTOs.length
         if (avis.numberOf > 0) {
-            value.entity.siteIndustrielBasolRayonParcelleDTOs.forEach(function (element) {
+            value.siteIndustrielBasolRayonParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -121,9 +121,9 @@ export default {
             lib: 'Liste des sites BASOL non géoréférencés',
             liste: []
         }
-        avis.numberOf = value.entity.siteIndustrielBasolNonGeorerenceesDTOs.length
+        avis.numberOf = value.siteIndustrielBasolNonGeorerenceesDTOs.length
         if (avis.numberOf !== 0) {
-            value.entity.siteIndustrielBasolNonGeorerenceesDTOs.forEach(function (element) {
+            value.siteIndustrielBasolNonGeorerenceesDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -135,12 +135,12 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.installationClasseeSurParcelleDTOs.length
+        avis.numberOf = value.installationClasseeSurParcelleDTOs.length
         if (avis.numberOf === 0) {
             avis.lib = 'N’est pas référencée dans l\'inventaire des installations classées en fonctionnement ou arrêtées.'
         } else {
             avis.lib = 'Est référencée dans l\'inventaire des installations classées sous le nom de :'
-            value.entity.installationClasseeSurParcelleDTOs.forEach(function (element) {
+            value.installationClasseeSurParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -156,9 +156,9 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.installationClasseeRayonParcelleDTOs.length
+        avis.numberOf = value.installationClasseeRayonParcelleDTOs.length
         if (avis.numberOf > 0) {
-            value.entity.installationClasseeRayonParcelleDTOs.forEach(function (element) {
+            value.installationClasseeRayonParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -170,12 +170,12 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.installationClasseeNonGeorerenceesDTOs.length
+        avis.numberOf = value.installationClasseeNonGeorerenceesDTOs.length
         if (avis.numberOf === 0) {
             avis.lib = 'Aucune Installation Classée non géoréférencée dans la commune'
         } else {
             avis.lib = 'Le résultat de cette recherche ne tient pas compte des ' + avis.numberOf + ' sites identifiés sur la commune qui n’ont pu être géolocalisés faute d’une information suffisante : '
-            value.entity.installationClasseeNonGeorerenceesDTOs.forEach(function (element) {
+            value.installationClasseeNonGeorerenceesDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -187,12 +187,12 @@ export default {
             lib: '',
             liste: []
         }
-        avis.numberOf = value.entity.secteurInformationSolSurParcelleDTOs.length
+        avis.numberOf = value.secteurInformationSolSurParcelleDTOs.length
         if (avis.numberOf === 0) {
             avis.lib = 'N’est pas situé en secteur d’information sur les sols (SIS).'
         } else {
             avis.lib = 'Est référencée dans l\'inventaire des secteurs d\'informations sur les sols'
-            value.entity.secteurInformationSolSurParcelleDTOs.forEach(function (element) {
+            value.secteurInformationSolSurParcelleDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }
@@ -204,9 +204,9 @@ export default {
             lib: 'Liste des secteurs d\'information sur les sols non géoréférencés',
             liste: []
         }
-        avis.numberOf = value.entity.secteurInformationSolNonGeorerenceesDTOs.length
+        avis.numberOf = value.secteurInformationSolNonGeorerenceesDTOs.length
         if (avis.numberOf !== 0) {
-            value.entity.secteurInformationSolNonGeorerenceesDTOs.forEach(function (element) {
+            value.secteurInformationSolNonGeorerenceesDTOs.forEach(function (element) {
                 avis.liste.push(element)
             }, this)
         }

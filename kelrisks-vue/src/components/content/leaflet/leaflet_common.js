@@ -1,10 +1,45 @@
 import JQuery from 'jquery'
+// Pour charger le plugin Leaflet.NonTiledLayer
+// https://github.com/ptv-logistics/Leaflet.NonTiledLayer
+import L from 'leaflet';
+//import 'leaflet.nontiledlayer/dist/NonTiledLayer.js';
+// version custom car sinon erreur au moment de l'export oops, something went wrong! DOMException: The operation is insecure.
+// cf les TODO dans le fichier
+import './NonTiledLayer-src.js';
+import * as conf from "../../../config.js";
 
 let $ = JQuery
 
 export default {
-    data: () => ({
-        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    data:  function () { 
+        let url;
+        // FIXME : mettre adresse service carto en config
+        if (document.domain === 'localhost'){
+            // https://geoservices.ign.fr/blog/2017/06/28/geoportail_sans_compte.html
+            // y a pas toutes les couches avec la clef pratique
+            url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        } else {
+            let key;
+            if(window.DOMAIN_MATOMO === 'brgm-rec'){
+                key = conf.config.clefsIGN.recette
+            } else {
+                key = conf.config.clefsIGN.production
+            }
+            // ne gere pas encore les DOM 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2'; 
+            let layer = conf.config.coucheIGN
+            url = "https://wxs.ign.fr/"+key+"/geoportail/wmts?" +
+            "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
+            "&STYLE=normal" +
+            "&TILEMATRIXSET=PM" +
+            //"&FORMAT=image/png"+
+            "&FORMAT=image/jpeg" +
+            "&LAYER=" + layer + 
+            "&TILEMATRIX={z}" +
+            "&TILEROW={y}" +
+            "&TILECOL={x}";
+        }
+        return { 
+        url: url,
         zoom: 16,
         bounds: null,
         reference: null,
@@ -17,14 +52,29 @@ export default {
         zooming: false,
         currentMaxZoom: 18,
         currentMinZoom: null
-    }),
+        }
+    },
     props: {
         maxZoomCenter: {
             type: Array,
             default: () => [0, 0]
         },
         maxZoom: {default: () => null},
-        minZoom: {default: () => null}
+        minZoom: {default: () => null},
+        wmsLayer: {default: () => null},
+        // urls des serveurs WMS de recette et prod
+        wmsServers: {
+            type: Object,
+            default: () => null
+        },
+        codesCommunes: {
+            type: Array,
+            default: () => []
+        },
+        bboxRisque: {
+            type: Array,
+            default: () => []
+        }
     },
     methods: {
         crippleMap (ref) {
@@ -93,8 +143,8 @@ export default {
             let map = this.$refs[ref].mapObject
 
             let control = "<div class=\"leaflet-control-zoom leaflet-bar leaflet-control\">" +
-                "   <a class=\"leaflet-control-zoom-in  leaflet-disabled\" title=\"Zoom in\" role=\"button\" aria-label=\"Zoom in\">+</a>" +
-                "   <a class=\"leaflet-control-zoom-out leaflet-disabled\" title=\"Zoom out\" role=\"button\" aria-label=\"Zoom out\">−</a>" +
+                "   <a class=\"leaflet-control-zoom-in  leaflet-disabled\" title=\"Vue rapprochée\" role=\"button\" aria-label=\"Vue rapprochée\">+</a>" +
+                "   <a class=\"leaflet-control-zoom-out leaflet-disabled\" title=\"Vue éloignée\" role=\"button\" aria-label=\"Vue éloignée\">−</a>" +
                 "</div>"
 
             $("#leafletMap_" + this.reference + " div.leaflet-top.leaflet-left").html(control)
@@ -237,7 +287,6 @@ export default {
                                 console.log("(!this.isCenterDefault() && this.maxZoomCenter && (initZoom || injectZoomControls))")
                                 this.initMapZoom(map, mapRef, injectZoomControls)
                             } else {
-                                console.log("else")
                                 this.mapCentered = true;
                             }
                         }, 1000);
@@ -247,6 +296,66 @@ export default {
         },
         isCenterDefault () {
             return this.maxZoomCenter && this.maxZoomCenter[0] === 0 && this.maxZoomCenter[1] === 0
+        },
+        // ajout couche WMS a la carte
+        addWmsLayer (ref, isDeletePreviousWmsLayer) {
+            console.log("addWmsLayer",ref)
+
+            // pour les PDF carte il y a une seule carte, il faut virer la couche WMS si elle deja presente sur la carte
+            let map = this.$refs[ref].mapObject
+            if(isDeletePreviousWmsLayer){
+                map.eachLayer(function(layer){
+                    if (layer.options.layers){ 
+                        map.removeLayer(layer)
+                    }
+                });
+            }
+
+            if(this.wmsLayer != null && this.wmsServers != null){
+                console.log("wmsLayer",this.wmsLayer)
+                console.log("codesCommunes", this.codesCommunes)
+
+                let wmsServerUrl = window.DOMAIN_MATOMO === 'brgm-rec' ? this.wmsServers['recette'] : this.wmsServers['prod']
+                console.log("wmsServerUrl",wmsServerUrl)
+
+                let paramsWms =  {
+                    layers: this.wmsLayer,
+                    format: 'image/png',
+                    transparent: true,
+                    opacity: 0.8
+                }
+
+                console.log("bboxRisque", this.wmsLayer, this.bboxRisque)
+                let confLayers = conf.config.couchesRisques
+
+                if(this.wmsLayer == confLayers.sismicite.layer || this.wmsLayer == confLayers.radon.layer){
+                    let codesCommunesQuoted = []
+                    this.codesCommunes.forEach(function (codeCommune) {
+                        codesCommunesQuoted.push("'"+codeCommune+"'")
+                    })
+ 
+                    paramsWms.codes_communes = codesCommunesQuoted.join()
+                } else if(this.wmsLayer == confLayers.argile.layer){
+                    paramsWms.xmin = this.bboxRisque[0]
+                    paramsWms.ymin = this.bboxRisque[1]
+                    paramsWms.xmax = this.bboxRisque[2]
+                    paramsWms.ymax = this.bboxRisque[3]
+                } else if(this.wmsLayer == confLayers.peb.layer){
+                    paramsWms.lon = this.maxZoomCenter[1];
+                    paramsWms.lat = this.maxZoomCenter[0];
+                    paramsWms.distance = 1000; // metres
+                } else if(this.wmsLayer == confLayers.canalisations.layer){
+                    paramsWms.x = this.maxZoomCenter[1];
+                    paramsWms.y = this.maxZoomCenter[0];
+                    paramsWms.rayon = 500; // metres
+                }
+
+                L.nonTiledLayer.wms(wmsServerUrl,paramsWms).addTo(map)
+                // let that = this
+                // layer.on("load",function() { 
+                //     console.log("all visible tiles have been loaded 2",that.zooming,this.mapCentered)
+                // });
+            } 
         }
     },
     watch: {

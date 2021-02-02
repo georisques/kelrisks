@@ -17,3 +17,8 @@
 **/target
 **/out
 **/*_old.*
+
+**/META-INF/
+**/venv/
+**/.vscode/
+**/fr/gouv/beta/fabnum/kelrisks/facade/mapping/*/*Impl.java

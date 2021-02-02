@@ -2,7 +2,8 @@
 
 ## Project setup
 ```
-npm install
+npm i -g @vue/cli
+rm -rf node_modules package-lock.json && npm install
 ```
 
 ### Compiles and hot-reloads for development
@@ -27,3 +28,6 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+    "terser-webpack-plugin": "^4.2.3",
+

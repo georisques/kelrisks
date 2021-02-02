@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
   <head>
     <meta charset="utf-8">
     <meta content="width=device-width,initial-scale=1.0"
@@ -27,11 +27,16 @@
           rel="mask-icon">
 
     <!-- Scripts -->
-
+    <script>
+      if(window.navigator.userAgent.match(/(MSIE|Trident)/)){
+         var ieError = "Essayez un navigateur plus moderne, ce site ne fonctionne pas avec Internet Explorer <= 11";
+         document.write(ieError);
+         alert(ieError);
+      }
+    </script>
     <!-- IE 11 Fetch fix -->
     <script src="https://cdn.polyfill.io/v2/polyfill.js?features=fetch"></script>
 
-    <!-- beta charte @ https://unpkg.com/template.data.gouv.fr@1.2.0/dist/ -->
     <link href="/css/main.min.css"
           rel="stylesheet">
     <link href="/css/template.css"
@@ -42,29 +47,39 @@
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P"
           rel="stylesheet">
 
-    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
-
     <!-- Matomo -->
-    <script type="text/javascript">
-    var _paq = window._paq || [];
-    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-    _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-    _paq.push(["setDomains", ["*.kelrisks.beta.gouv.fr", "*.51.254.32.174", "*.vps627816.ovh.net"]]);
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
-    (function () {
-      var u = "//kelrisks.beta.gouv.fr/mat/";
-      _paq.push(['setTrackerUrl', u + 'm.php']);
-      _paq.push(['setSiteId', '1']);
-      var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-      g.type = 'text/javascript';
-      g.async = true;
-      g.defer = true;
-      g.src = u + 'm.js';
-      s.parentNode.insertBefore(g, s);
-    })();
-    </script>
-    <!-- End Matomo Code -->
+	<script type="text/javascript">
+		var DOMAIN_MATOMO = '';
+		var ID_SITE_MATOMO = '';
+		// 12
+	    var MATOMO_API_KEYS = [
+	        {host: 'kelrisks.brgm-rec.fr', idSite: '272', domainMatomo: 'brgm-rec'},
+	        {host: 'errial.georisques.gouv.fr', idSite: '266', domainMatomo: 'brgm'},        
+	        {host: '*', idSite: '272', domainMatomo: 'brgm-rec'}
+	    ];
+	    
+	    for(var i=0; i<MATOMO_API_KEYS.length; i++){
+	         var k = MATOMO_API_KEYS[i];
+	         if ('*' === k.host || -1 !== document.domain.indexOf(k.host)) {
+				 ID_SITE_MATOMO = k.idSite;
+				 DOMAIN_MATOMO = k.domainMatomo;
+	             break;
+	         }    
+	    }	
+	
+		 var _paq = window._paq || [];
+		 /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+		 _paq.push(['trackPageView']);
+		 _paq.push(['enableLinkTracking']);
+		 (function() {
+		 var u="https://wwwstats."+DOMAIN_MATOMO+".fr/";
+		 _paq.push(['setTrackerUrl', u+'piwik.php']);
+		 _paq.push(['setSiteId', ID_SITE_MATOMO]);
+		 var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+		 g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+		 })();
+	</script>
+	<!-- End Matomo Code -->
   </head>
   <body>
     <div id="app"></div>

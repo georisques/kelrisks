@@ -1,7 +1,7 @@
 <template>
     <div id="erp_wrapper">
         <div id="erp_text">
-            <h1>État des Risques Réglementés pour l'Information des Acquéreurs et des Locataires</h1>
+            <h1>État des risques réglementés pour l'information des acquéreurs et des locataires</h1>
             <p>La loi du 30 juillet 2003 a institué une
                 <b>obligation d'information des acquéreurs et locataires</b> (IAL) d'un bien immobilier sur certains
                 <b>risques majeurs auxquels est exposé ce bien</b>.
@@ -17,9 +17,7 @@
                    disponibles sur le site internet de la préfecture ou d'informations dont il dispose sur le bien, notamment les sinistres que le bien a subis</b>.</p>
         </div>
         <div id="erp_picture">
-            <img height="334"
-                 src="/images/femmesCanape.png"
-                 width="344">
+            <img src="/images/canape.png">
         </div>
     </div>
 </template>
@@ -62,7 +60,7 @@ export default {
 #erp_picture img {
 	bottom   : 100px;
 	margin   : auto;
-	position : absolute;
+	/* position : absolute; */
 	top      : 0;
 }
 </style>

@@ -203,7 +203,7 @@ export default {
         getResultsListFunction: {
             type: Function,
             default: function (data) {
-                return data['entity']
+                return data
             },
             required: false
         },

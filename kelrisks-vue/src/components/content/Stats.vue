@@ -2,8 +2,8 @@
     <div id="stats_wrapper">
         <h2 class="section__title">Statistiques</h2><br>
         <br>
-        <div class="histogram_wrapper">
-            <div class="histogram_title_wrapper">
+        <!-- <div class="histogram_wrapper"> -->
+            <!-- <div class="histogram_title_wrapper">
                 Utilisateurs
             </div>
             <div class="histogram_bars_wrapper">
@@ -19,8 +19,8 @@
             <div class="histogram_labels_wrapper">
                 <div class="histogram_label">Professionnels</div>
                 <div class="histogram_label">Particuliers</div>
-            </div>
-        </div>
+            </div> -->
+        <!-- </div> -->
         <div class="value_wrapper">
             <div class="value_title_wrapper">
                 Avis rendus
@@ -37,14 +37,14 @@
                 {{ pdf_nb }}
             </div>
         </div>
-        <div class="value_wrapper push-2">
+        <!-- <div class="value_wrapper push-2">
             <div class="value_title_wrapper">
                 Bureaux d'Étude consultés
             </div>
             <div class="value_text_wrapper">
                 {{ bureau_etude_nb }}
             </div>
-        </div>
+        </div> -->
         <div class="value_wrapper half">
             <div class="value_title_wrapper"
                  style="margin-top: -5px; margin-bottom: 5px;">
@@ -79,31 +79,38 @@ export default {
     name: 'Stats',
     data: () => ({
         stats: {},
-        professionnel_pct: 0,
-        professionnel_nb: 0,
-        particulier_pct: 0,
-        particulier_nb: 0,
+        // professionnel_pct: 0,
+        // professionnel_nb: 0,
+        // particulier_pct: 0,
+        // particulier_nb: 0,
         avis_rendu_nb: 0,
         pdf_nb: 0,
-        bureau_etude_nb: 0
+        // bureau_etude_nb: 0,
+        env: {
+            presentationVersion: process.env.VUE_APP_VERSION,
+            version: '',
+            frontPath: process.env.VUE_APP_FRONT_PATH,
+            backPath: process.env.VUE_APP_BACK_STATIC_PATH,
+            apiPath: process.env.VUE_APP_BACK_API_PATH
+        }
     }),
     methods: {
         getStats () {
-            let idSite = '1'
-            let period = 'range'
-            let date = '2019-02-21,2022-12-31'
-            let url = 'https://kelrisks.beta.gouv.fr/mat/?module=API&idSite=' + idSite + '&method=Events.getAction&secondaryDimension=eventName&flat=1&period=' + period + '&date=' + date + '&format=json'
+            //let period = 'range'
+            //let date = '2019-02-21,2022-12-31'
+            let url = this.env.apiPath + "stats";
+            //'https://wwwstats.' + window.DOMAIN_MATOMO + '.fr/piwik.php?module=API&idSite=' + window.ID_SITE_MATOMO + '&method=Events.getAction&secondaryDimension=eventName&flat=1&period=' + period + '&date=' + date + '&format=json'
             fetchWithError(url, null, 1000 * 20)
                 .then(stream => stream.json())
                 .then(value => {
                     this.stats = value
                     // console.log(this.stats)
-                    let demandeurs = this.getEventAction('Demandeur')
+                    //let demandeurs = this.getEventAction('Demandeur')
                     // console.log(demandeurs)/
-                    this.professionnel_nb = demandeurs.events.Professionnel.nb_events
-                    this.professionnel_pct = 100 / demandeurs.nb_events_sum * demandeurs.events.Professionnel.nb_events
-                    this.particulier_nb = demandeurs.events.Particulier.nb_events
-                    this.particulier_pct = 100 / demandeurs.nb_events_sum * demandeurs.events.Particulier.nb_events
+                    // this.professionnel_nb = demandeurs.events.Professionnel.nb_events
+                    // this.professionnel_pct = 100 / demandeurs.nb_events_sum * demandeurs.events.Professionnel.nb_events
+                    // this.particulier_nb = demandeurs.events.Particulier.nb_events
+                    // this.particulier_pct = 100 / demandeurs.nb_events_sum * demandeurs.events.Particulier.nb_events
 
                     let avis = this.getEventAction('Avis')
                     if (avis.events.Rendu) this.avis_rendu_nb = avis.events.Rendu.nb_events
@@ -114,7 +121,7 @@ export default {
 
                     // let bureauEtude = this.getEventAction('Bureau_Etude')
                     // console.log(bureauEtude)
-                    if (avis.events.Bureau_Etude) this.bureau_etude_nb = avis.events.Bureau_Etude.nb_events
+                    //if (avis.events.Bureau_Etude) this.bureau_etude_nb = avis.events.Bureau_Etude.nb_events
                 })
         },
         getEventAction (actionName) {
@@ -143,7 +150,8 @@ export default {
         }
     },
     mounted () {
-        this.getStats()
+        // TODO : cf ticket https://gitlab.brgm.fr/brgm/georisques/georisques-brgm/kelrisks/-/issues/70
+        // this.getStats()
     }
 }
 </script>
@@ -174,7 +182,7 @@ export default {
 
     .value_wrapper {
         margin           : 20px;
-        width            : calc(30% - 40px);
+        width            : calc(50% - 40px);
         height           : 125px;
         background-color : white;
         box-shadow       : #999999 0 2px 4px;

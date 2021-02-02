@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+//@RestController
 @ApiIgnore
 //@Api(tags = {"API Installations Classées (S3IC)"}, description = "API permettant les recoupements concernant les Installations Classées (S3IC)")
 public class ApiS3IC extends AbstractBasicApi {

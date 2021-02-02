@@ -110,9 +110,7 @@
             <div class="product_wrapper">
                 <a class="product"
                    href="index.html">
-                    <span class="">kelrisks</span><img alt="data.gouv.fr"
-                                                       class="beta"
-                                                       src="/images/pointbetagouvfr.svg"/>
+                    <span class="">errial.georisques.gouv.fr</span>
                 </a>
                 <p class="tagline">Évaluez simplement et rapidement les risques de votre bien</p>
             </div>
@@ -131,11 +129,10 @@
                                      @bulletclick="changeStep"/>
             </div>
 
-            <unsafe-login v-if="env.backPath.includes('preprod') || env.backPath.includes('localhost')"/>
+            <!-- <unsafe-login v-if="env.backPath.includes('preprod') || env.backPath.includes('localhost')"/> -->
 
             <search-form-parcelle @avis="avis = $event"
                                   :tinyUrl="tinyUrl"
-                                  @cgu="$refs.cgu.open()"
                                   @flow="updateflow"
                                   @form="form = $event"
                                   @leaflet="leaflet = $event"
@@ -167,17 +164,14 @@
                                      v-show="flow.index === 4"/>
 
             <stats v-show="flow.index === 666"/>
+            <how-to class="clearfix"
+                    v-show="flow.index <= 1"/>
 
+            <e-r-p class="clearfix"
+                v-show="flow.index <= 1"/>
         </main>
 
-        <how-to class="clearfix"
-                v-show="flow.index <= 1"/>
-
-        <e-r-p class="clearfix"
-               v-show="flow.index <= 1"/>
-
         <footer>
-
             <a class="marianne"
                href="index.html">
                 <img :src="env.backPath + '/mte.png'"
@@ -192,24 +186,25 @@
             </div>
 
             <div class="column">
-                <a @click="$refs.haw.open()">Qui sommes nous ?</a>
+                <a href="https://assistance.brgm.fr/aide/Georisques"
+                   rel="noopener" target="_blank">Contactez-nous</a>
                 <a href="https://www.georisques.gouv.fr/cgu"
-                   rel="noopener noreferrer"
+                   rel="noopener"
                    target="_blank">CGU</a>
-                <a @click="showStats()">Stats</a>
-                <a href="/swagger-ui.html"
-                   rel="noopener noreferrer"
+                <a href="https://www.georisques.gouv.fr/donnees-personnelles"
+                   rel="noopener"
+                   target="_blank">Données personnelles</a>
+                <!-- Les stats bugs (matomo) -->
+                <!-- <a @click="showStats()">Stats</a> -->
+                <!--<a href="/swagger-ui.html"
+                   rel="noopener"
 
-                   target="_blank">API</a>
+                   target="_blank">API</a>-->
             </div>
 
             <div class="version">{{ env.presentationVersion }}</div>
 
-            <who-are-we ref="haw"/>
-
         </footer>
-
-        <konami/>
 
         <div id="loading"
              v-show="flow.loading">
@@ -225,8 +220,6 @@
 
 <script>
 import HowTo from '../components/content/HowTo'
-import WhoAreWe from '../components/content/WhoAreWe'
-import Konami from '../components/content/Konami'
 import SearchFormParcelle from '../components/content/search/SearchFormParcelle'
 import SearchResults from '../components/content/search/SearchResults'
 import Stats from '../components/content/Stats'
@@ -235,7 +228,6 @@ import BulletProgressBar from "./content/BulletProgressBar";
 import ERP from "./content/ERP";
 import CompleterERRIAL from "./content/search/CompleterERRIAL";
 import TelechargerERRIAL from "./content/search/TelechargerERRIAL";
-import UnsafeLogin from "@/components/content/base/UnsafeLogin";
 
 export default {
     name: 'Kelrisks',
@@ -265,7 +257,6 @@ export default {
         }
     }),
     components: {
-        UnsafeLogin,
         CompleterERRIAL,
         TelechargerERRIAL,
         ERP,
@@ -273,9 +264,7 @@ export default {
         Stats,
         SearchResults,
         SearchFormParcelle,
-        HowTo,
-        WhoAreWe,
-        Konami
+        HowTo
     },
     methods: {
         updateflow (value) {
@@ -325,7 +314,7 @@ export default {
         fetchWithError(this.env.apiPath + 'appversion/')
             .then(stream => stream.json())
             .then(value => {
-                let currentAppVersion = value.entity
+                let currentAppVersion = value
                 let localAppVersion = localStorage.getItem('localKelrisksVersion')
                 // console.log('localAppVersion : ' + localAppVersion)
                 // console.log('currentAppVersion : ' + currentAppVersion)
@@ -638,10 +627,6 @@ footer div.version {
 .lien:hover {
 	background : none;
 	color      : #003B80;
-}
-
-svg {
-	margin : 0 10px;
 }
 
 .button svg,

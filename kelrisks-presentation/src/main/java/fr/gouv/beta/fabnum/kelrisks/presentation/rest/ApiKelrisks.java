@@ -1,8 +1,7 @@
 package fr.gouv.beta.fabnum.kelrisks.presentation.rest;
 
-import javax.ws.rs.core.Response;
-
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,14 +18,14 @@ public class ApiKelrisks {
     }
     
     @GetMapping("/api/apiversion")
-    public Response getApiVersion() {
+    public ResponseEntity<String> getApiVersion() {
         
-        return Response.ok(apiVersion).build();
+        return ResponseEntity.ok(apiVersion);
     }
     
     @GetMapping("/api/appversion")
-    public Response getAppVersion() {
+    public ResponseEntity<String> getAppVersion() {
         
-        return Response.ok(appVersion).build();
+        return ResponseEntity.ok(appVersion);
     }
 }

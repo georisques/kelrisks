@@ -2,6 +2,7 @@
     <div class="leaflet_wrapper">
         <l-map :center="maxZoomCenter"
                :zoom="zoom"
+               :options="{attributionControl: false}"
                :id="'leafletMap_' + reference"
                :ref="'leafletMap_' + reference">
             <l-tile-layer :url="url"/>

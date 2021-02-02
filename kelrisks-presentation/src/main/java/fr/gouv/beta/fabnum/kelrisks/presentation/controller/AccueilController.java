@@ -10,7 +10,7 @@ public class AccueilController {
     @RequestMapping("/")
     public String accueil() {
         
-        return "redirect:/swagger-ui.html";
+        return "index.html";
     }
     
     @RequestMapping("/sanity_test")

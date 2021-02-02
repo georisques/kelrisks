@@ -39,7 +39,7 @@
 
             <div class="container bordered ppr">
                 <div>
-                    <div class="errial_title"><span class="title">Télécharger l'ERRIAL « État des Risques Réglementés - Information des Acquéreurs et des Locataires »</span></div>
+                    <div class="errial_title"><span class="title">Télécharger l'ERRIAL « état des risques réglementés pour l'information des acquéreurs et des locataires »</span></div>
                     <p>Il appartient au propriétaire du bien de vérifier l'exactitude de ces informations autant que de besoin et, le cas échéant, de le compléter à partir d'informations disponibles
                        sur le site internet de la préfecture ou d'informations dont il dispose sur le bien, notamment les sinistres que le bien a subis.</p>
                     <p v-if="hasPPR"><strong>Le propriétaire doit joindre les extraits de la carte réglementaire et du règlement du PPR qui concernent la parcelle.</strong></p>
@@ -50,14 +50,18 @@
                                  :min-zoom="14"
                                  :parcelle="leaflet.data.parcelles"
                                  @png="pngGenerated"
+                                 :wms-layer="currentWmsLayer"
+                                 :wms-servers="currentWmsServers"
+                                 :codes-communes="this.avis.codesCommunes"
+                                 :bbox-risque="this.avis.bboxParcelles"
                                  v-show="currentData !== ''"/>
                     </div>
-                    <div id="pdf"
-                         @click="getPdf">
-                        <a><span style="font-size: 5em;"><font-awesome-icon icon="file-pdf"/></span></a><br/>
-                        <a>État des risques au format PDF</a>
+                    <div id="pdf">
+                        <a @click="getPdf" style="display:inline-block; float:none; text-decoration: none !important;"><span style="font-size: 5em;"><font-awesome-icon icon="file-pdf"/></span><br/>
+                        <span v-if="isLoading"><font-awesome-icon icon="spinner" style="margin : 0 10px 0 0;" spin/>Génération du PDF en cours...<br>Veuillez patienter plusieurs secondes...</span>
+                        <span v-else>État des risques au format PDF</span>
+                        </a>
                     </div>
-                    <!--                    <p>En savoir plus sur les risques, consulter <a href="https://www.georisques.gouv.fr/">Géorisque</a>.</p>-->
                 </div>
             </div>
 
@@ -72,6 +76,7 @@ import Leaflet from "../leaflet/LeafletPdf";
 import fetchWithError from "../../../script/fetchWithError";
 import moment from "moment"
 import mixinAvisHas from "../../mixins/avisHas";
+import * as conf from "../../../config.js";
 
 export default {
     name: 'TelechargerERRIAL',
@@ -102,8 +107,12 @@ export default {
             apiPath: process.env.VUE_APP_BACK_API_PATH
         },
         dataList: [],
+        isDownload: false,
+        isLoading: false,
         currentData: '',
         currentPngName: '',
+        currentWmsLayer: null,
+        currentWmsServers: null,
         pngList: [],
     }),
     methods: {
@@ -131,38 +140,38 @@ export default {
 
             if (this.hasSismicite) this.dataList.push([
                 typeof this.avis.summary.commune.communesLimitrophes.map === 'function' ?
-                    [{data: this.avis.summary.commune.codeZoneSismicite === '1' ? [this.avis.summary.commune.multiPolygon] : [], color: '#D8D8D8'},
-                        {data: this.avis.summary.commune.codeZoneSismicite === '2' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FFD332'},
-                        {data: this.avis.summary.commune.codeZoneSismicite === '3' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FF8000'},
-                        {data: this.avis.summary.commune.codeZoneSismicite === '4' ? [this.avis.summary.commune.multiPolygon] : [], color: '#E02B17'},
-                        {data: this.avis.summary.commune.codeZoneSismicite === '5' ? [this.avis.summary.commune.multiPolygon] : [], color: '#840505'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '1').map(x => x.multiPolygon), color: '#D8D8D8'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '2').map(x => x.multiPolygon), color: '#FFD332'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '3').map(x => x.multiPolygon), color: '#FF8000'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '4').map(x => x.multiPolygon), color: '#E02B17'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '5').map(x => x.multiPolygon), color: '#840505'}] :
+                    [{data: this.avis.summary.commune.codeZoneSismicite === '1' ? [this.avis.summary.commune.multiPolygon] : [], color: '#D8D8D8', opacity: 0},
+                        {data: this.avis.summary.commune.codeZoneSismicite === '2' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FFD332', opacity: 0},
+                        {data: this.avis.summary.commune.codeZoneSismicite === '3' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FF8000', opacity: 0},
+                        {data: this.avis.summary.commune.codeZoneSismicite === '4' ? [this.avis.summary.commune.multiPolygon] : [], color: '#E02B17', opacity: 0},
+                        {data: this.avis.summary.commune.codeZoneSismicite === '5' ? [this.avis.summary.commune.multiPolygon] : [], color: '#840505', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '1').map(x => x.multiPolygon), color: '#D8D8D8', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '2').map(x => x.multiPolygon), color: '#FFD332', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '3').map(x => x.multiPolygon), color: '#FF8000', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '4').map(x => x.multiPolygon), color: '#E02B17', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '5').map(x => x.multiPolygon), color: '#840505', opacity: 0}] :
                     undefined,
-                "SISMICITE"])
+                "SISMICITE", conf.config.couchesRisques.sismicite.layer, conf.config.couchesRisques.sismicite.serveurs])
 
             if (this.hasRadonHaut || this.hasRadonMoyen) this.dataList.push([
                 typeof this.avis.summary.commune.communesLimitrophes.map === 'function' ?
-                    [{data: this.avis.summary.commune.classePotentielRadon === '1' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FFD334'},
-                        {data: this.avis.summary.commune.classePotentielRadon === '2' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FF8002'},
-                        {data: this.avis.summary.commune.classePotentielRadon === '3' ? [this.avis.summary.commune.multiPolygon] : [], color: '#840507'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '1').map(x => x.multiPolygon), color: '#FFD334'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '2').map(x => x.multiPolygon), color: '#FF8004'},
-                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '3').map(x => x.multiPolygon), color: '#840507'}] :
+                    [{data: this.avis.summary.commune.classePotentielRadon === '1' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FFD334', opacity: 0},
+                        {data: this.avis.summary.commune.classePotentielRadon === '2' ? [this.avis.summary.commune.multiPolygon] : [], color: '#FF8002', opacity: 0},
+                        {data: this.avis.summary.commune.classePotentielRadon === '3' ? [this.avis.summary.commune.multiPolygon] : [], color: '#840507', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '1').map(x => x.multiPolygon), color: '#FFD334', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '2').map(x => x.multiPolygon), color: '#FF8004', opacity: 0},
+                        {data: this.avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '3').map(x => x.multiPolygon), color: '#840507', opacity: 0}] :
                     undefined,
-                "RADON"])
+                "RADON", conf.config.couchesRisques.radon.layer, conf.config.couchesRisques.radon.serveurs])
 
             if (this.hasPEB) this.dataList.push([
                 typeof this.avis.plansExpositionBruit.map === 'function' ?
-                    [{data: this.avis.plansExpositionBruit.filter(x => x.zone === 'D').map(x => x.multiPolygon), color: '#058E0C'},
-                        {data: this.avis.plansExpositionBruit.filter(x => x.zone === 'C').map(x => x.multiPolygon), color: '#FFD332'},
-                        {data: this.avis.plansExpositionBruit.filter(x => x.zone === 'B').map(x => x.multiPolygon), color: '#FF8000'},
-                        {data: this.avis.plansExpositionBruit.filter(x => x.zone === 'A').map(x => x.multiPolygon), color: '#840505'}] :
+                    [{data: this.avis.plansExpositionBruit.filter(x => x.zone === 'D').map(x => x.multiPolygon), color: '#058E0C', opacity: 0},
+                        {data: this.avis.plansExpositionBruit.filter(x => x.zone === 'C').map(x => x.multiPolygon), color: '#FFD332', opacity: 0},
+                        {data: this.avis.plansExpositionBruit.filter(x => x.zone === 'B').map(x => x.multiPolygon), color: '#FF8000', opacity: 0},
+                        {data: this.avis.plansExpositionBruit.filter(x => x.zone === 'A').map(x => x.multiPolygon), color: '#840505', opacity: 0}] :
                     undefined,
-                "PEB"])
+                "PEB", conf.config.couchesRisques.peb.layer, conf.config.couchesRisques.peb.serveurs])
 
             if (this.hasPollutionNonReglementaire) this.dataList.push([
                 typeof this.avis.plansExpositionBruit.map === 'function' ?
@@ -174,24 +183,22 @@ export default {
 
             if (this.hasArgile) this.dataList.push([
                 typeof this.avis.plansExpositionBruit.map === 'function' ?
-                    [{data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 1).map(x => x.multiPolygon), color: '#FFE340'},
-                        {data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 2).map(x => x.multiPolygon), color: '#FF9020'},
-                        {data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 3).map(x => x.multiPolygon), color: '#841520'}] :
+                    [{data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 1).map(x => x.multiPolygon), color: '#FFE340', opacity: 0},
+                        {data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 2).map(x => x.multiPolygon), color: '#FF9020', opacity: 0},
+                        {data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 3).map(x => x.multiPolygon), color: '#841520', opacity: 0}] :
                     undefined,
-                "ARGILE"])
+                "ARGILE", conf.config.couchesRisques.argile.layer, conf.config.couchesRisques.argile.serveurs])
 
             if (this.hasCanalisations) this.dataList.push([
                 typeof this.avis.plansExpositionBruit.map === 'function' ?
-                    [{data: this.avis.canalisations, color: '#2A4999'}] :
+                    [{data: this.avis.canalisations, color: '#2A4999', opacity: 0}] :
                     undefined,
-                "CANALISATIONS"])
+                "CANALISATIONS", conf.config.couchesRisques.canalisations.layer, conf.config.couchesRisques.canalisations.serveurs])
 
             this.feedLeaflet();
         },
         pngGenerated (png) {
             console.log('pngGenerated')
-            console.log(png)
-
             this.pushCurrentPng(png)
         },
         debounceFetchPdf () {
@@ -199,63 +206,94 @@ export default {
             this.debounce = setTimeout(() => {
                 // do the work here
                 this.fetchPdf()
-                this._paq.push(['trackEvent', 'Flow', 'Pdf'])
             }, 100);
         },
         getPdf () {
             console.log('getPdf')
-
+            // État des risques au format PDF
+            this.isDownload = false
+            this.isLoading = true
+            this.pngList = []
             this.generatePngs()
         },
         feedLeaflet () {
             console.log("feedLeaflet")
 
-            console.log(this.dataList)
+            console.log("dataList",this.dataList)
 
             while (this.dataList.length !== 0) {
 
                 let data = this.dataList.shift()
 
-                // console.log(data)
+                console.log("dataList data",data)
 
                 if (data && data.length > 0) {
                     this.currentPngName = data[1]
                     this.currentData = data[0]
+                    // add WMS layer
+                    if(data.length > 2){
+                        this.currentWmsLayer = data[2]
+                        this.currentWmsServers = data[3]
+                    } else {
+                        this.currentWmsLayer = null
+                        this.currentWmsServers = null
+                    }
                     return
                 }
             }
 
             this.currentData = ''
+            this.currentWmsLayer = null
+            this.currentWmsServers = null
             this.debounceFetchPdf()
         },
         fetchPdf () {
-            // console.log('fetchPdf')
+            // FIXME : pour eviter de lancer 2 appels de l'API PDF pour une demande de PDF
+            // le 1er PDF est OK mais le second a des cartes incompletes
+            if(!this.isDownload){
+                this._paq.push(['trackEvent', 'Flow', 'Pdf'])
+                console.log('fetchPdf')
+                this.isDownload = true
 
-            fetchWithError(this.env.apiPath + 'avis/pdf?' +
-                'codeINSEE=' + this.form.codeInsee + '&' +
-                'codeParcelle=' + this.form.selectedParcellesList.join(',') + '&' +
-                'errial=' + this.avis.errial,
-                {
-                    method: "POST",
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                let parcelles = this.form.selectedParcellesList
+                let parcellesValues = ""
+
+                // si la demande provient d'un lien partagé, la liste parcelles est vide FIXME : bug ?
+                console.log("parcelles.length ",parcelles.length )
+                if (parcelles.length == 0){
+                    parcellesValues = this.avis.codeParcelles.join(',')
+                } else {
+                    parcellesValues = parcelles.join(',')
+                }
+
+                fetchWithError(this.env.apiPath + 'avis/pdf?' +
+                    'codeINSEE=' + this.form.codeInsee + '&' +
+                    'codeParcelle=' + parcellesValues + '&' +
+                    'errial=' + this.avis.errial,
+                    {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.pngList)
                     },
-                    body: JSON.stringify(this.pngList)
-                },
-                1000 * 30)
-                .then(resp => resp.arrayBuffer())
-                .then(resp => {
-                    return new Blob([resp], {type: "application/pdf"})
-                })
-                .then(resp => {
-                    const fileURL = window.URL.createObjectURL(resp)
-                    const link = document.createElement('a')
-                    link.href = fileURL
-                    link.download = "ERRIAL_Parcelle_" + this.form.selectedParcellesList.join(',') + "_" + moment(new Date()).format('DDMMYYYY') + ".pdf"
-                    link.click()
-                    // window.location.assign(fileURL);
-                })
+                    1000 * 90)
+                    .then(resp => resp.arrayBuffer())
+                    .then(resp => {
+                        return new Blob([resp], {type: "application/pdf"})
+                    })
+                    .then(resp => {
+                        this.isLoading = false
+                        const fileURL = window.URL.createObjectURL(resp)
+                        const link = document.createElement('a')
+                        link.href = fileURL
+                        link.download = "ERRIAL_Parcelle_" + parcellesValues + "_" + moment(new Date()).format('DDMMYYYY') + ".pdf"
+                        link.click()
+                        // window.location.assign(fileURL);
+                    })
+            }
+
         },
         pushCurrentPng (png) {
             console.log('Push currentPng')

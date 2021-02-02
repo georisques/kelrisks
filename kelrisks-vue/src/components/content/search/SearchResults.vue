@@ -25,7 +25,7 @@
             </div>
 
             <div id="actionButtonsWrapper">
-                <input :value="env.frontPath + '#/' + avis.summary.codeUrl"
+                <input :value="env.siteURL +'#/' + avis.summary.codeUrl"
                        id="copyInput"
                        style="position: absolute; left: -1000px; top: -1000px;"/>
 
@@ -61,12 +61,12 @@
 
             <span class="title">Risques faisant l'objet d'une obligation d'information au titre de l'IAL</span>
 
-            <risque :description="(!plan.existsInGeorisque && !plan.existsInGpu ? 'La commune est située' : 'L’immeuble est situé') + ' dans le périmètre d’un ' +  plan.alea.familleAlea.famillePPR.libelle + ' (PPR) de type ' + plan.alea.familleAlea.libelle + ' - ' + plan.alea.libelle +
+            <risque :description="(!plan.existsInGeorisque && !plan.existsInGpu ? 'La commune est située' : 'L’immeuble est situé') + ' dans le périmètre d’un ' +  plan.alea.familleAlea.famillePPR.libelle + ' (PPR) de type ' + plan.alea.familleAlea.libelle + 
                                   (plan.dateApprobation ? ', approuvé le ' + formatDate(plan.dateApprobation) : '') +
                                   (plan.datePrescription ? ', prescrit le ' + formatDate(plan.datePrescription) : '') +
                                   (plan.dateApplicationAnticipee ? ', anticipé le ' + formatDate(plan.dateApplicationAnticipee) : '') +
                                   '.<br/>' +
-                                  (plan.dateApprobation ? 'Un PPR approuvé est un PPR définitivement adopté.' : '') +
+                                  (plan.dateApprobation ? 'Un PPR approuvé est un PPR définitivement adopté. ' : '') +
                                   (plan.datePrescription ? 'Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d\'élaboration.' : '') +
                                   (plan.dateApplicationAnticipee ? 'Un PPR anticipé est un PPR non encore approuvé mais dont les règles sont  déjà à appliquer, par anticipation.' : '') +
                                   '<br/><br/>' +
@@ -88,25 +88,25 @@
                                   '<a href=\'#recommendations_sismicite\'>Lire les recommandations</a>'"
                     :leaflet-data="typeof avis.summary.commune.communesLimitrophes.map ===  'function' ?
                                    [{ data : avis.summary.commune.codeZoneSismicite === '1' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#D8D8D8'},
+                                      color : '#D8D8D8', opacity: 0},
                                     { data : avis.summary.commune.codeZoneSismicite === '2' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.summary.commune.codeZoneSismicite === '3' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.summary.commune.codeZoneSismicite === '4' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#E02B17'},
+                                      color : '#E02B17', opacity: 0},
                                     { data : avis.summary.commune.codeZoneSismicite === '5' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#840505'},
+                                      color : '#840505', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '1').map(x => x.multiPolygon),
-                                      color : '#D8D8D8'},
+                                      color : '#D8D8D8', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '2').map(x => x.multiPolygon),
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '3').map(x => x.multiPolygon),
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '4').map(x => x.multiPolygon),
-                                      color : '#E02B17'},
+                                      color : '#E02B17', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.codeZoneSismicite === '5').map(x => x.multiPolygon),
-                                      color : '#840505'}] :
+                                      color : '#840505', opacity: 0}] :
                                     undefined"
                     :leaflet-min-zoom="14"
                     :legend-blocks="[
@@ -117,6 +117,9 @@
                         ['#840505', '5 - fort']]"
                     :level="avis.summary.commune.codeZoneSismicite + ''"
                     :level-max="'5'"
+                    :leaflet-wms-servers="conf.config.couchesRisques.sismicite.serveurs"
+                    :leaflet-wms-layer="conf.config.couchesRisques.sismicite.layer"
+                    :leaflet-codes-communes="avis.codesCommunes"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_seisme_bleu.png'"
                     :title="'Sismicité'"
                     :parcelle="leaflet.data.parcelles"
@@ -127,19 +130,22 @@
                                   '<a href=\'#recommendations_radon\'>Lire les recommandations</a>'"
                     :leaflet-data="typeof avis.summary.commune.communesLimitrophes.map ===  'function' ?
                                    [{ data : avis.summary.commune.classePotentielRadon === '1' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.summary.commune.classePotentielRadon === '2' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.summary.commune.classePotentielRadon === '3' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#840505'},
+                                      color : '#840505', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '1').map(x => x.multiPolygon),
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '2').map(x => x.multiPolygon),
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '3').map(x => x.multiPolygon),
-                                      color : '#840505'}] :
+                                      color : '#840505', opacity: 0}] :
                                     undefined"
                     :leaflet-min-zoom="14"
+                    :leaflet-wms-servers="conf.config.couchesRisques.radon.serveurs"
+                    :leaflet-wms-layer="conf.config.couchesRisques.radon.layer"
+                    :leaflet-codes-communes="avis.codesCommunes"
                     :legend-blocks="[
                         ['#FFD332', '1 : potentiel radon faible'],
                         ['#FF8000', '2 : potentiel radon moyen'],
@@ -156,7 +162,7 @@
                     :max-zoom-center="leaflet.center"
                     :description="'<p>Les pollutions des sols peuvent présenter un risque sanitaire lors des changements d’usage des sols (travaux, aménagements changement d’affectation des terrains) si elles ne sont pas prises en compte dans le cadre du projet.</p>'"
                     :detail="(avis.installationClasseeParcelle.numberOf > 0 ? '- La parcelle a accueilli une ou plusieurs installation(s) classée(s) pour la protection de l’environnement soumise(s) à autorisation ou à enregistrement. Cette activité a pu provoquer des pollutions, notamment des sols des eaux souterraines ou des eaux superficielles.</br>Installation(s) concernée(s)  : <br/>' + getLibelleInstallationsclassees : '') +
-                             (avis.sisParcelle.numberOf > 0 ? '- La parcelle est située en <a href=\'' + avis.sisParcelle.fiche_risque + '\' target=\'_blank\' rel=\'noopener noreferrer\'>secteur d’information sur les sols</a>.</br>' : '') +
+                             (avis.sisParcelle.numberOf > 0 ? '- La parcelle est située en <a href=\'' + avis.sisParcelle.liste[0].ficheRisque + '\' target=\'_blank\' rel=\'noopener\'>secteur d’information sur les sols</a>.</br>' : '') +
                              (false ? '- La parcelle est affectée d’une servitude d’utilité publique au titre des installations classées au titre de l’article L515-12 du code de l’environnement.' : '') +
                              '<p><a href=\'#recommendations_pollution\'>Lire les recommandations</a></p>'"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_basias_bleu.png'"
@@ -168,18 +174,18 @@
                     :max-zoom-center="leaflet.center"
                     :detail="(avis.zonePlanExpositionBruit === 'A' ? 'Le niveau d’exposition au bruit de la parcelle est très fort (zone A en rouge). La zone A est principalement inconstructible.' : '') +
                              (avis.zonePlanExpositionBruit === 'B' ? 'Le niveau d’exposition au bruit de la parcelle est fort (zone B en orange). La zone B est principalement inconstructible.' : '') +
-                             (avis.zonePlanExpositionBruit === 'C' ? 'Le niveau d’exposition au bruit de la parcelle est modéré (zone C en jaune). Certaines constructions sont autorisées sous conditions.' : '') +
+                             (avis.zonePlanExpositionBruit === 'C' ? 'Le niveau d’exposition au bruit de la parcelle est modéré (zone C en jaune). Certaines constructions sont autorisées sous conditions et sous réserve de mesures d’isolation acoustique.' : '') +
                              (avis.zonePlanExpositionBruit === 'D' ? 'Le niveau d’exposition au bruit de la parcelle est faible (zone D en verte). Les nouveaux logements sont autorisés à condition qu’ils fassent l’objet d’une isolation phonique.' : '')"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_bruit_bleu.png'"
                     :leaflet-data="typeof avis.plansExpositionBruit.map ===  'function' ?
                                    [{ data : avis.plansExpositionBruit.filter(x => x.zone === 'D').map(x => x.multiPolygon),
-                                      color : '#058E0C'},
+                                      color : '#058E0C', opacity: 0},
                                     { data : avis.plansExpositionBruit.filter(x => x.zone === 'C').map(x => x.multiPolygon),
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.plansExpositionBruit.filter(x => x.zone === 'B').map(x => x.multiPolygon),
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.plansExpositionBruit.filter(x => x.zone === 'A').map(x => x.multiPolygon),
-                                      color : '#840505'}] :
+                                      color : '#840505', opacity: 0}] :
                                     undefined"
                     :legend-blocks="[
                         ['#840505', 'A - très fort'],
@@ -187,6 +193,8 @@
                         ['#FFD332', 'C - modéré'],
                         ['#058E0C', 'D - faible']]"
                     :level="avis.zonePlanExpositionBruit"
+                    :leaflet-wms-servers="conf.config.couchesRisques.peb.serveurs"
+                    :leaflet-wms-layer="conf.config.couchesRisques.peb.layer"
                     :title="'Bruit'"
                     v-if="hasPEB"/>
 
@@ -217,7 +225,8 @@
                     <p>Votre immeuble est situé dans le périmètre d’un plan de prévention des risques. Il peut être concerné par l’obligation de réaliser certains travaux. Pour le savoir vous devez
                        consulter le PPR auprès de votre commune ou sur le site de votre préfecture.</p>
                     <p v-if="hasPPRN">Si votre bien est concerné par une obligation de travaux, vous pouvez bénéficier d'une aide de l'État, dans le cadre du Fonds de prévention des risques naturels
-                                      majeurs (FPRNM). Pour plus de renseignements, contacter la direction départementale des territoires (DDT) de votre département.</p>
+                                      majeurs (FPRNM).</p>
+                    <p>Pour plus de renseignements, contacter la direction départementale des territoires (DDT) de votre département ou votre Direction de l'environnement, de l'aménagement et du logement (DEAL), si vous êtes en Outre-mer.</p>
                     <p>Pour se préparer et connaître les bons réflexes en cas de survenance du risque, consulter le dossier d'information communal sur les risques majeurs (DICRIM) auprès de votre
                        commune.</p>
                 </template>
@@ -229,11 +238,11 @@
                         sur le site Plan Séisme pour identifier précisément les dispositions à prendre en compte selon votre localisation, votre type d'habitat ou votre projet. Il est consultable à
                         l'adresse suivante :<br/>
                         <a href="http://www.planseisme.fr/-Didacticiel-.html"
-                           rel="noopener noreferrer"
+                           rel="noopener"
                            target="_blank">Didacticiel de la règlementation parasismique</a><br/>
                         Pour connaitre les consignes à appliquer en cas de séisme, vous pouvez consulter le site :<br/>
                         <a href="http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html"
-                           rel="noopener noreferrer"
+                           rel="noopener"
                            target="_blank">Que faire en cas de séisme ?</a>
                     </p>
                     <p v-if="hasSismiciteHaute || hasSismiciteTresHaute">Pour le bâti neuf et pour certains travaux lourds sur le bâti existant, en fonction de la zone de sismicité et du type de
@@ -242,12 +251,12 @@
                                                                          prendre en compte selon votre localisation, votre type
                                                                          d'habitat ou votre projet :<br/>
                         <a href="http://www.planseisme.fr/-Didacticiel-.html"
-                           rel="noopener noreferrer"
+                           rel="noopener"
                            target="_blank">Didacticiel de la règlementation parasismique</a></p>
                     <template v-if="hasSismiciteHaute">
                         <p>Pour connaitre les consignes à appliquer en cas de séisme, vous pouvez consulter le site :<br/>
                             <a href="http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html"
-                               rel="noopener noreferrer"
+                               rel="noopener"
                                target="_blank">Que faire en cas de séisme ?</a></p>
                     </template>
                     <template v-if="hasSismiciteTresHaute">
@@ -262,7 +271,7 @@
                         <p>Ne pas allumer de flamme.</p>
                         <p>Pour plus de détails, vous pouvez consulter le site :<br/>
                             <a href="http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html"
-                               rel="noopener noreferrer"
+                               rel="noopener"
                                target="_blank">Que faire en cas de séisme ?</a></p>
                     </template>
                 </template>
@@ -277,8 +286,8 @@
                        vérifier leur efficacité.</p>
                     <p>Une fiche d'informations sur le radon, le risque associé, son mesurage, les solutions techniques et les recommandations à suivre en fonction des résultats du mesurage est
                        disponible : </p>
-                    <p><a href="http://www.georisques.gouv.fr/sites/default/files/2018-Fiche%20d_information_sur_le_risque_potentiel_radon_DHUP-DGS-DGPR_102018_v3.pdf"
-                          rel="noopener noreferrer"
+                    <p><a href="https://www.georisques.gouv.fr/sites/default/files/ial/2018-Fiche%20d_information_sur_le_risque_potentiel_radon_DHUP-DGS-DGPR_102018_v3.pdf"
+                          rel="noopener"
                           target="_blank">Information sur le risque
                                           potentiel radon</a>.</p>
                 </template>
@@ -298,7 +307,7 @@
                        certifiés dans le domaine des sols pollués est consultable à l'aide de ce lien :</p>
                     <p><a @click="_paq.push(['trackEvent', 'Flow', 'Avis', 'Bureau_Etude'])"
                           href='https://www.lne.fr/recherche-certificats/search/222'
-                          rel="noopener noreferrer"
+                          rel="noopener"
                           target="_blank"
                           style="float: none; text-align: center">Accéder à la liste des bureaux d’études certifiés</a></p>
                 </template>
@@ -319,18 +328,21 @@
                     :title="'Radon'"
                     :leaflet-data="typeof avis.summary.commune.communesLimitrophes.map ===  'function' ?
                                    [{ data : avis.summary.commune.classePotentielRadon === '1' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.summary.commune.classePotentielRadon === '2' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.summary.commune.classePotentielRadon === '3' ? [avis.summary.commune.multiPolygon] : [],
-                                      color : '#840505'},
+                                      color : '#840505', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '1').map(x => x.multiPolygon),
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '2').map(x => x.multiPolygon),
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.summary.commune.communesLimitrophes.filter(x => x.classePotentielRadon === '3').map(x => x.multiPolygon),
-                                      color : '#840505'}] :
+                                      color : '#840505', opacity: 0}] :
                                     undefined"
+                    :leaflet-wms-servers="conf.config.couchesRisques.radon.serveurs"
+                    :leaflet-wms-layer="conf.config.couchesRisques.radon.layer"
+                    :leaflet-codes-communes="avis.codesCommunes"                                    
                     :leaflet-min-zoom="14"
                     :legend-blocks="[
                         ['#FFD332', '1 : potentiel radon faible'],
@@ -350,7 +362,7 @@
                               (!hasPollutionPrincipale && numberOfParcelleMatches > 0 ? '<p>' + numberOfParcelleMatches + ' site(s) présente(nt) une proximité forte avec votre parcelle. Dans le cas où vous souhaiteriez en savoir davantage, il est recommandé de faire réaliser une étude historique et, le cas échéant, des analyses de sols par un bureau d’étude spécialisé dans le domaine des sols pollués.</p>' : '') +
                               (hasPollutionCentroidCommune ? '<p>Les données disponibles mentionnent parfois la présence d\'anciennes activités qui sont localisées par défaut sur le centre géographique de la commune lorsqu\'une localisation précise n\'est pas disponible. La présente analyse n\'en tient donc pas compte.</p>' : '')"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_basias_bleu.png'"
-                    :title="'Pollution des sols (500m)'"
+                    :title="'Pollution des sols (500 m)'"
                     :parcelle="leaflet.data.parcelles"
                     :max-zoom-center="leaflet.center"
                     :leaflet-data="[{ data : avis.installationClasseeRayonParcelle.liste.map(x => x.ewkt),
@@ -372,7 +384,7 @@
                     v-if="hasAZI && !hasTRI && !hasPPRi"/>
 
             <risque :description="'Votre bien est situé à moins de ' + (avis.hasCentraleNucleaire ? '20 km' :  '10 km') + ' d’une installation nucléaire de base, installation dans laquelle une certaine quantité de substance ou de matière radioactives est présente (ex. réacteurs nucléaires de production d\'électricité (centrale nucléraire), installations de préparation, enrichissement, fabrication, traitement ou entreposage de combustibles nucléaires ; etc.)'"
-                    :detail="'<p>Ces installations sont contrôlées par l’Autorité de Sureté Nucléaire dont les rapports de contrôle sont consultables au lien suivant : <a href=\'https://www.asn.fr/Controler/Actualites-du-controle\' target=\'_blank\' rel=\'noopener noreferrer\'>https://www.asn.fr/Controler/Actualites-du-controle.</a></p>' +
+                    :detail="'<p>Ces installations sont contrôlées par l’Autorité de Sureté Nucléaire dont les rapports de contrôle sont consultables au lien suivant : <a href=\'https://www.asn.fr/Controler/Actualites-du-controle\' target=\'_blank\' rel=\'noopener\'>https://www.asn.fr/Controler/Actualites-du-controle.</a></p>' +
                              '<p>Installation(s) concernée(s)  : <br/>' + getLibelleInstallationsNucleaires + '</p>'"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_nucleaires_bleu.png'"
                     :title="'Installations nucléaires de base'"
@@ -381,16 +393,16 @@
             <risque :parcelle="leaflet.data.parcelles"
                     :max-zoom-center="leaflet.center"
                     :description="'Les sols argileux évoluent en fonction de leur teneur en eau. De fortes variations d’eau (sécheresse ou d’apport massif d’eau) peuvent donc fragiliser progressivement les constructions (notamment les maisons individuelles aux fondations superficielles) suite à des gonflements et des tassements du sol, et entrainer des dégâts pouvant être importants. Le zonage \'argile\' identifie les zones exposées à ce phénomène de retrait-gonflement selon leur degré d’exposition.'"
-                    :detail="(avis.niveauArgile === 3 ? 'Exposition forte : La probabilité de survenue d’un sinistre est élevée et l’intensité des phénomènes attendus est forte. Les constructions, notamment les maisons individuelles, doivent être réalisées en suivant des prescriptions constructives ad hoc. Pour plus de détails</br><a href=\'https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3\' target=\'_blank\' rel=\'noopener noreferrer\'>Sols argileux sécheresse et construction</a>' : '') +
-                             (avis.niveauArgile === 2 ? 'Exposition moyenne : La probabilité de survenue d’un sinistre est moyenne, l’intensité attendue étant modérée.  Les constructions, notamment les maisons individuelles, doivent être réalisées en suivant des prescriptions constructives ad hoc. Pour plus de détails :</br><a href=\'https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3\' target=\'_blank\' rel=\'noopener noreferrer\'>Sols argileux sécheresse et construction</a>' : '') +
-                             (avis.niveauArgile === 1 ? 'Exposition faible : La survenance de sinistres est possible en cas de sécheresse importante, mais ces désordres ne toucheront qu’une faible proportion des bâtiments (en priorité ceux qui présentent des défauts de construction ou un contexte local défavorable, avec par exemple des arbres proches ou une hétérogénéité du sous-sol). Il est conseillé, notamment pour la construction d’une maison individuelle, de réaliser une étude de sols pour déterminer si des prescriptions constructives spécifiques sont nécessaires. Pour plus de détails :</br><a href=\'https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3\' target=\'_blank\' rel=\'noopener noreferrer\'>Sols argileux sécheresse et construction</a>' : '') +
+                    :detail="(avis.niveauArgile === 3 ? 'Exposition forte : La probabilité de survenue d’un sinistre est élevée et l’intensité des phénomènes attendus est forte. Les constructions, notamment les maisons individuelles, doivent être réalisées en suivant des prescriptions constructives ad hoc. Pour plus de détails</br><a href=\'https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3\' target=\'_blank\' rel=\'noopener\'>Sols argileux sécheresse et construction</a>' : '') +
+                             (avis.niveauArgile === 2 ? 'Exposition moyenne : La probabilité de survenue d’un sinistre est moyenne, l’intensité attendue étant modérée.  Les constructions, notamment les maisons individuelles, doivent être réalisées en suivant des prescriptions constructives ad hoc. Pour plus de détails :</br><a href=\'https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3\' target=\'_blank\' rel=\'noopener\'>Sols argileux sécheresse et construction</a>' : '') +
+                             (avis.niveauArgile === 1 ? 'Exposition faible : La survenance de sinistres est possible en cas de sécheresse importante, mais ces désordres ne toucheront qu’une faible proportion des bâtiments (en priorité ceux qui présentent des défauts de construction ou un contexte local défavorable, avec par exemple des arbres proches ou une hétérogénéité du sous-sol). Il est conseillé, notamment pour la construction d’une maison individuelle, de réaliser une étude de sols pour déterminer si des prescriptions constructives spécifiques sont nécessaires. Pour plus de détails :</br><a href=\'https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3\' target=\'_blank\' rel=\'noopener\'>Sols argileux sécheresse et construction</a>' : '') +
                              (avis.niveauArgile === 0 ? 'Exposition nulle : aucune présence de sols argileux n’a été identifiée selon les cartes géologiques actuelles. Toutefois il peut y avoir des poches ponctuelles de sols argileux.' : '') "
                     :leaflet-data="[{ data : avis.lentillesArgile.filter(x => x.niveauAlea === 1).map(x => x.multiPolygon),
-                                      color : '#FFD332'},
+                                      color : '#FFD332', opacity: 0},
                                     { data : avis.lentillesArgile.filter(x => x.niveauAlea === 2).map(x => x.multiPolygon),
-                                      color : '#FF8000'},
+                                      color : '#FF8000', opacity: 0},
                                     { data : avis.lentillesArgile.filter(x => x.niveauAlea === 3).map(x => x.multiPolygon),
-                                      color : '#840505'}]"
+                                      color : '#840505', opacity: 0}]"
                     :leaflet-min-zoom="14"
                     :legend-blocks="[
                         ['#FFD332', '1 : Exposition faible'],
@@ -398,15 +410,21 @@
                         ['#840505', '3 : Exposition forte']]"
                     :level="avis.niveauArgile + ''"
                     :level-max="'3'"
+                    :leaflet-wms-servers="conf.config.couchesRisques.argile.serveurs"
+                    :leaflet-wms-layer="conf.config.couchesRisques.argile.layer"
+                    :leaflet-bbox-risque="avis.bboxParcelles"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_terre_bleu.png'"
                     :title="'Argile'"
                     v-if="hasArgile"/>
-
+            <!-- https://wiki.openstreetmap.org/wiki/Zoom_levels 16 384 , 65 536 -->
             <risque :parcelle="leaflet.data.parcelles"
                     :max-zoom-center="leaflet.center"
-                    :description="'Une canalisation de matières dangereuses (gaz naturel, produits pétroliers ou chimiques) est située dans un rayon de 500m autour de votre parcelle. La carte représente les implantations présentes autour de votre localisation. Il convient de rechercher une information plus précise en se rendant en mairie.'"
+                    :leaflet-max-zoom="14" 
+                    :description="'Une canalisation de matières dangereuses (gaz naturel, produits pétroliers ou chimiques) est située dans un rayon de 500 m autour de votre parcelle. La carte représente les implantations présentes autour de votre localisation. Il convient de rechercher une information plus précise en se rendant en mairie.'"
                     :leaflet-data="[{ data : avis.canalisations,
-                                      color : '#2A4999'}]"
+                                      color : '#2A4999', opacity: 0}]"
+                    :leaflet-wms-servers="conf.config.couchesRisques.canalisations.serveurs"
+                    :leaflet-wms-layer="conf.config.couchesRisques.canalisations.layer"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_reseaux_canalisation_bleu.png'"
                     :title="'Canalisations transport de matières dangereuses'"
                     v-if="hasCanalisations"/>
@@ -454,8 +472,7 @@
                 <a @click="$emit('flow', 1)"
                    class="bouton success"
                    href='#bullet-progress-bar_wrapper'
-                   rel="noopener noreferrer"
-                   target="_blank">
+                   >
                     Compléter l'état des risques
                     <font-awesome-icon class="end"
                                        icon="chevron-right"/>
@@ -472,6 +489,7 @@ import Leaflet from "../leaflet/LeafletResults";
 import Risque from "../Risque";
 import moment from "moment"
 import mixinAvisHas from "../../mixins/avisHas";
+import * as conf from "../../../config.js";
 
 export default {
     name: 'SearchResults',
@@ -499,7 +517,8 @@ export default {
         env: {
             frontPath: process.env.VUE_APP_FRONT_PATH,
             backPath: process.env.VUE_APP_BACK_STATIC_PATH,
-            apiPath: process.env.VUE_APP_BACK_API_PATH
+            apiPath: process.env.VUE_APP_BACK_API_PATH,
+            siteURL: "https://" + document.domain + "/"
         },
         tab: {
             concordances: {
@@ -508,18 +527,19 @@ export default {
                 },
                 index: 'POLLUTION'
             }
-        }
+        },
+        conf: conf
     }),
     methods: {
         formatDate (date) {
             return moment(date).format('DD/MM/YYYY')
         },
         copyLink () {
-            this._paq.push(['trackEvent', 'Flow', 'Copy Link']);
-            let copyInput = document.getElementById("copyInput");
-            copyInput.select();
-            document.execCommand("copy");
-            alert("URL copiée : " + copyInput.value);
+            this._paq.push(['trackEvent', 'Flow', 'Copy Link'])
+            let copyInput = document.getElementById("copyInput")
+            copyInput.select()
+            document.execCommand("copy")
+            alert("URL copiée : " + copyInput.value)
         },
         getLogoRisque (codeAlea) {
 
@@ -528,11 +548,23 @@ export default {
                     return 'ic_inondation_bleu'
                 case '12' :
                     return 'ic_terre_bleu'
+                case '13' :
+                    return 'ic_seisme_bleu'
+                case '14' :
+                    return 'ic_r_montagne_bleu'
+                case '15' :
+                    return 'ic_volcan_bleu'
+                case '16' :
+                    return 'ic_feu_foret_bleu'
+                case '17' :
+                    return 'ic_meteo_bleu'
+                case '18' :
+                    return 'ic_rn_bleu'
                 case '21' :
                     return 'ic_industrie_bleu'
                 default :
                     console.log(codeAlea)
-                    return 'ic_basias_bleu'
+                    return 'ic_multirisque_bleu'
             }
         }
     },
@@ -545,7 +577,7 @@ export default {
 
             for (let installation in this.avis.installationClasseeParcelle.liste) {
                 installation = this.avis.installationClasseeParcelle.liste[installation]
-                libelle += '- <a href="https://www.georisques.gouv.fr/risques/installations/donnees/details/' + installation.code + '" target="_blank" rel="noopener noreferrer">' + installation.nom + '</a><br/>'
+                libelle += '- <a href="https://www.georisques.gouv.fr/risques/installations/donnees/details/' + installation.code + '" target="_blank" rel="noopener">' + installation.nom + '</a><br/>'
             }
 
             return libelle
@@ -562,8 +594,8 @@ export default {
         }
     },
     mounted () {
+        console.log("this.avis", this.avis)
         this.mounted = true
-
         this.$nextTick(() => {
             // this.$refs.resultsErrors.sendSuccess('Participez à améliorer Kelrisks en répondant à ce court questionnaire (durée 3min)<a target=\'_blank\' style=\'display:inline-block; margin: 0 10px; min-width: 0; float: none;\' class=\'bouton\' href=\'https://docs.google.com/forms/d/e/1FAIpQLSd3tB_gWGZsucCihp4VYDqv0Vxq61nqnpQJeMkI17nY39St_w/viewform?usp=sf_link\'>Répondre</a>')
         })

@@ -24,7 +24,7 @@
                 <img height="75"
                      src="/images/icons/kelrisks/howTo3.svg"
                      width="75">
-                <p>Vous complétez l'état des risques (ERRIAL)</p>
+                <p>Vous complétez l'état des risques (ERRIAL).</p>
             </div>
         </div>
         <hr>

@@ -2,6 +2,7 @@ package fr.gouv.beta.fabnum.kelrisks.presentation.rest;
 
 import fr.gouv.beta.fabnum.commun.metier.util.CipherSpecs;
 import fr.gouv.beta.fabnum.commun.metier.util.SecurityHelper;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.Base64;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.NotBlank;
 import javax.ws.rs.QueryParam;
 
 import org.jsoup.Jsoup;
@@ -19,8 +21,9 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Log4j2
 @RestController
-public class ApiQrCode {
+public class ApiQrCode extends AbstractBasicApi {
     
     @Value("${kelrisks.app.security.passphrase}")
     String passphrase;
@@ -30,7 +33,7 @@ public class ApiQrCode {
     }
     
     @GetMapping(value = "/api/qrcode/check", produces = MediaType.TEXT_HTML_VALUE)
-    public String checkQrCode(@QueryParam("hash") String hash) {
+    public String checkQrCode(@QueryParam("hash") @NotBlank String hash) {
         
         CipherSpecs cipherSpecs = new CipherSpecs();
         cipherSpecs.IV = Base64.getDecoder().decode(hash.split("###")[0]);
@@ -54,7 +57,7 @@ public class ApiQrCode {
             return htmlDocument.outerHtml();
         }
         catch (IOException e) {
-            e.printStackTrace();
+           log.error("Fail to create HTML from QR Code", e);
         }
         
         return "<!DOCTYPE html>\n" +

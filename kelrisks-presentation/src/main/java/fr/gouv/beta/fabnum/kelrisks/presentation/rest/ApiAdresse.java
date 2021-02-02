@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+//@RestController
 @Api(tags = {"API Base Adresse Nationale (BAN)"}, description = "API permettant les recoupements concernant la BAN")
 public class ApiAdresse extends AbstractBasicApi {
     
@@ -34,7 +34,7 @@ public class ApiAdresse extends AbstractBasicApi {
     public Response communePartielle(@ApiParam(required = true, name = "query", value = "Terme partiel.")
                                      @PathVariable("query") String query) {
     
-        List<CommuneDTO> autocompleteDTOs = gestionCommuneFacade.rechercherCommunePartielle(query);
+        List<CommuneDTO> autocompleteDTOs = null;//gestionCommuneFacade.rechercherCommunePartielle(query);
         
         return Response.ok(autocompleteDTOs).build();
     }

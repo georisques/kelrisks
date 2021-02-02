@@ -4,23 +4,29 @@
                v-if="reference !== null"
                :id="'leafletMap_' + reference"
                :ref="'leafletMap_' + reference"
+               :options="{attributionControl: false}"
                :zoom="zoom">
             <l-tile-layer :url="url"/>
             <l-geo-json :geojson="getData(parcelle)"
                         :options="featureOptions"
                         :options-style="styleFunction('#455674')"
                         :ref="'lGeoJson_Parcelle_' + reference"/>
+            <!-- un data sans color ? && wmsLayer == null"-->
             <l-geo-json :geojson="getData(data)"
                         :ref="'lGeoJson_' + reference"
                         :options="featureOptions"
                         :options-style="styleFunction('#455674')"
-                        v-if="typeof data === 'string'"/>
+                        v-if="typeof data === 'string' "/>
+
+                        <!-- v-else-if="wmsLayer == null" -->
+                        <!-- v-else: -->
             <l-geo-json :geojson="getData(json.data)"
                         :ref="'lGeoJson_' + reference + '_' + index"
-                        v-else
+                        
+                        v-else:
                         :key="json.color + '_' + index"
                         :options="featureOptions(json.color)"
-                        :options-style="styleFunction(json.color)"
+                        :options-style="styleFunction(json.color, json.opacity)"
                         v-for="(json, index) in data"/>
         </l-map>
     </div>
@@ -52,22 +58,22 @@ export default {
     data: () => ({}),
     methods: {
         centerMap () {
-
+            console.log("centerMap")
             let map = this.$refs['leafletMap_' + this.reference].mapObject
-
             let bounds = null
 
+            // FIXME : peut être un bug, si on a une liste de geom, il zoom sur la derniere geom
             for (let ref in this.$refs) {
-
-                if (!ref.includes('lGeoJson_')) continue
-
+                if (!ref.includes('lGeoJson_')) {
+                    continue
+                }
                 let lGeoJson = Array.isArray(this.$refs[ref]) ? this.$refs[ref][0] : this.$refs[ref]
 
                 if (typeof lGeoJson.getBounds === 'function') {
 
                     if (Object.prototype.hasOwnProperty.call(lGeoJson.getBounds(), "_northEast")) {
                         if (bounds === null) bounds = lGeoJson.getBounds()
-
+                        console.log(this.wmsLayer,bounds)
                         if (bounds._northEast.lat < lGeoJson.getBounds()._northEast.lat) bounds._northEast.lat = lGeoJson.getBounds()._northEast.lat
                         if (bounds._northEast.lng < lGeoJson.getBounds()._northEast.lng) bounds._northEast.lng = lGeoJson.getBounds()._northEast.lng
                         if (bounds._southWest.lat > lGeoJson.getBounds()._southWest.lat) bounds._southWest.lat = lGeoJson.getBounds()._southWest.lat
@@ -88,23 +94,33 @@ export default {
                 }
 
                 this.updateMapUntilFitsBounds(map, 'leafletMap_' + this.reference, bounds, true, true)
+                // pas mieux
+                //this.addWmsLayer('leafletMap_' + this.reference)
             }
         },
         getData (data) {
             if (typeof data === 'string') return this.parseJSON(data)
             return this.parseJSONMap(data)
         },
-        styleFunction (color) {
-
+        styleFunction (color, opacity) {
+            let fillOpacity
             if (!color) color = "#455674"
+
+            // opacity a 0 pour ne pas afficher la couche geojson
+            if (opacity !== 0) {
+                opacity = 0.8
+                fillOpacity = 0.2
+            } else {
+                fillOpacity = 0
+            }
 
             return () => {
                 return {
                     weight: 2,
                     color: color,
-                    opacity: 0.8,
+                    opacity: opacity,
                     fillColor: color,
-                    fillOpacity: 0.2
+                    fillOpacity: fillOpacity
                 };
             };
         },
@@ -176,16 +192,20 @@ export default {
     },
     mounted () {
 
-        // console.log(this.reference + " => mounted")
-
         this.reference = this._uid
+        console.log(this.reference + " => mounted")
 
         this.$nextTick(() => {
-
+            console.log("$nextTick")
             // console.log(this.reference + " => $nextTick")
-
-            this.crippleMap('leafletMap_' + this.reference)
+            let ref = 'leafletMap_' + this.reference
+            this.crippleMap(ref)
             this.centerMap()
+
+            // FIXME time out pour eviter de charger la couche WMS a chaque fois que la carte chanque emprise a cause du centerMap()
+            setTimeout(() => {
+                this.addWmsLayer(ref)
+            }, 2000);    
             // if (!this.isCenterDefault()) this.injectCustomZoomControl('leafletMap_' + this.reference)
         })
         window.addEventListener('resize', this.centerMap)

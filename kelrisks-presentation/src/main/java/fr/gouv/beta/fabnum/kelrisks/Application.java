@@ -2,11 +2,16 @@ package fr.gouv.beta.fabnum.kelrisks;
 
 import fr.gouv.beta.fabnum.commun.metier.util.SecurityHelper;
 import io.netty.channel.ChannelOption;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
 import reactor.util.annotation.NonNull;
+
+import javax.net.ssl.SSLException;
 
 import org.geolatte.geom.json.GeolatteGeomModule;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,10 +56,8 @@ public class Application extends SpringBootServletInitializer {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
         
-                registry.addMapping("/**/api/**");
+                //registry.addMapping("/**/api/**");// bug avec spring boot 2.4.0
                 registry.addMapping("/api/**");
-                // TODO : enlever en prod !!!
-                //                registry.addMapping("/mail");
             }
         };
     }
@@ -87,13 +90,18 @@ public class Application extends SpringBootServletInitializer {
     @Bean
     public ClientHttpConnector clientHttpConnector(@Value("${webclient.enable-keep-alive}") final boolean keepAlive,
                                                    @Value("${webclient.read-timeout-in-seconds}") final int readTimeout,
-                                                   @Value("${webclient.write-timeout-in-seconds}") final int writeTimeout) {
+                                                   @Value("${webclient.write-timeout-in-seconds}") final int writeTimeout) throws SSLException {
+        // FIXME ignore SSL error https://stackoverflow.com/a/53147631
+    	SslContext context = SslContextBuilder.forClient()
+    		    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+    		    .build();
+    	HttpClient httpClient = HttpClient.from(TcpClient.create()
+                .option(ChannelOption.SO_KEEPALIVE, keepAlive)
+                .doOnConnected(connection -> connection
+                                                     .addHandlerLast(new ReadTimeoutHandler(readTimeout))
+                                                     .addHandlerLast(new WriteTimeoutHandler(writeTimeout)))).compress(false).secure(t -> t.sslContext(context));
     
-        return new ReactorClientHttpConnector(HttpClient.from(TcpClient.create()
-                                                                      .option(ChannelOption.SO_KEEPALIVE, keepAlive)
-                                                                      .doOnConnected(connection -> connection
-                                                                                                           .addHandlerLast(new ReadTimeoutHandler(readTimeout))
-                                                                                                           .addHandlerLast(new WriteTimeoutHandler(writeTimeout)))));
+        return new ReactorClientHttpConnector(httpClient);
     }
     
     @Bean(name = "securityHelperEncoder")

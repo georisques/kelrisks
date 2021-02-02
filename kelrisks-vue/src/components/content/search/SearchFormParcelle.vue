@@ -4,7 +4,7 @@
              style="margin-bottom: 40px">
         <div class="container">
             <div class="panel noborder">
-                <h3 class="">Localisez votre bien pour réaliser votre état des risques Réglementés,<br/>Information des Acquéreurs et des Locataires (ERRIAL)</h3>
+                <h3 class="">Localisez votre bien pour réaliser votre état des risques réglementés,<br/>pour l'information des acquéreurs et des locataires (ERRIAL)</h3>
 
                 <errors ref="searchErrors"/>
 
@@ -76,7 +76,8 @@
                                 v-if="querying">
                             <font-awesome-icon icon="spinner"
                                                spin/>
-                            Recherche en cours...
+                            Recherche en cours...<br>
+                            Veuillez patienter plusieurs secondes...
                         </button>
                         <button @click="search"
                                 class="bouton"
@@ -91,7 +92,7 @@
                     </div>
 
                     <div id="cgu">
-                        <p>En poursuivant votre navigation, vous acceptez nos <a v-on:click="$emit('cgu')">CGU</a>.</p>
+                        <p>En poursuivant votre navigation, vous acceptez nos <a href="https://www.georisques.gouv.fr/cgu" rel="noopener" target="_blank">CGU</a>.</p>
                     </div>
                 </div>
 
@@ -160,12 +161,17 @@ export default {
                 this.showLeaflet(true)
 
                 fetchWithError(this.env.apiPath + "cadastre/proximite/" + option['geometry']['coordinates']['0'] + "/" + option['geometry']['coordinates']['1'], null, 1000 * 10)
-                    .then(stream => stream.json())
-                    .then(data => {
-                        if (data.entity) {
-                            this.leaflet.parcelleFound = data.entity.section + '-' + data.entity.numero + '@' + data.entity.commune
+                .then(r => {
+                   if (r.status !== 200) {
+                        this.$refs.searchErrors.sendError("Le service de recherche n'est pas disponible pour le moment, veuillez réessayer plus tard.")
+                        return
+                    }             
+                    r.json().then(data => {
+                        if (data) {
+                            this.leaflet.parcelleFound = data.prefixe + '-' + data.section + '-' + data.numero + '@' + data.commune
                         }
                     })
+                })
 
             } else {
                 this.form.codeInsee = ''
@@ -196,14 +202,16 @@ export default {
                 this.$refs.searchErrors.clearWarnings()
                 this.$refs.searchErrors.clearErrors()
 
-                fetchWithError(this.env.apiPath + "cadastre/match/" + this.form.codeInsee + "/" + this.form.codeParcelle, null, 1000 * 10)
-                    .then(stream => stream.json())
-                    .then(data => {
-
-                        if (data.entity) {
-                            this.leaflet.center = [parseFloat(data.entity.centroid.y), parseFloat(data.entity.centroid.x)]
+                fetchWithError(this.env.apiPath + "cadastre/match/" + this.form.codeInsee + "/" + this.form.codeParcelle, null, 1000 * 10).then(r => {
+                   if (r.status !== 200) {
+                        this.$refs.searchErrors.sendError("Le service de recherche n'est pas disponible pour le moment, veuillez réessayer plus tard.")
+                        return
+                    }
+                    r.json().then(data => {
+                        if (data && data.parcelle) {
+                            this.leaflet.center = [parseFloat(data.centroid.y), parseFloat(data.centroid.x)]
                             this.showLeaflet(true)
-                            this.leaflet.parcelleFound = data.entity.parcelle.section + '-' + data.entity.parcelle.numero + '@' + data.entity.parcelle.commune
+                            this.leaflet.parcelleFound = data.parcelle.prefixe + '-' + data.parcelle.section + '-' + data.parcelle.numero + '@' + data.parcelle.commune
                         } else {
                             this.clearSelectedParcelles()
                             if (this.form.codeParcelle !== '') this.$refs.searchErrors.sendWarning('Aucune parcelle n\'a été trouvé avec le code suivant : ' + this.form.codeParcelle + '.')
@@ -212,8 +220,8 @@ export default {
                     })
                     .catch((e) => {
                         console.log(e)
-                        // this.$refs.searchErrors.sendError('Une erreur est survenue.')
-                    })
+                        this.$refs.searchErrors.sendError('Une erreur est survenue. Merci de réessayer ultérieurement.')
+                    })})
             }
             if (!this.form.codeParcelle) {
                 this.clearSelectedParcelles()
@@ -236,27 +244,33 @@ export default {
             this.$emit('loading')
             this.$emit('setflow', 0)
             fetch(this.env.apiPath + 'url?' + 'code=' + codeAvis)
-                .then(stream => stream.json())
-                .then(value => {
-                    if (value.status === 422) {
+               .then(r => {
+                    if (r.status !== 200) {
                         // console.log('Wrong code')
-                        this.$refs.searchErrors.sendError("Oups! Votre recherche n'a pas été trouvée :-(.")
-                        this.$refs.searchErrors.sendError("Si vous l'avons perdue, veuillez bien vouloir nous en excuser.")
+                        if(r.status === 422){
+                            this.$refs.searchErrors.sendError("Oups ! Votre recherche n'a pas été trouvée :-(.")
+                            this.$refs.searchErrors.sendError("Si nous l'avons perdue, veuillez bien vouloir nous en excuser.")
+                        } else { // 500
+                            this.$refs.searchErrors.sendError("Le service de recherche n'est pas disponible pour le moment, veuillez réessayer plus tard.")
+                        }
+
                         this.$emit('loaded')
                         return
                     }
-                    console.log(value.entity.url)
-                    let array = value.entity.url.split('|&|')
-                    console.log(array)
+                    r.json().then(value => {
+                        console.log(value)
+                        let array = value.url.split('|&|')
+                        console.log(array)
 
-                    this.form.selectedParcellesList = array[0].split(',')
-                    this.form.codeInsee = array[1]
-                    this.form.nomAdresse = array[2]
+                        this.form.selectedParcellesList = array[0].split(',')
+                        this.form.codeInsee = array[1]
+                        this.form.nomAdresse = array[2]
 
-                    console.log(this.form)
+                        console.log(this.form)
 
-                    this.getAvis()
-                })
+                        this.getAvis()
+                    })
+               }) 
         }
     },
     watch: {

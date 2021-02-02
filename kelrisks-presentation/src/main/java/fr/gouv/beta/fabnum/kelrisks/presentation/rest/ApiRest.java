@@ -20,6 +20,6 @@ public class ApiRest {
     @ApiOperation(value = "Racine de l'API permettant de tester la disponibilité", response = String.class)
     public Response index() {
         
-        return Response.ok("L'API REST est démarrée").build();
+        return Response.ok("L'API REST est démarrée 2").build();
     }
 }
