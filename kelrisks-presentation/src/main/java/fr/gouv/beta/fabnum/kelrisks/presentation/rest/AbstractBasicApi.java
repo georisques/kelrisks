@@ -1,14 +1,7 @@
 package fr.gouv.beta.fabnum.kelrisks.presentation.rest;
 
-import fr.gouv.beta.fabnum.commun.facade.dto.JsonInfoDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.ParcelleDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionParcelleFacade;
-import fr.gouv.beta.fabnum.kelrisks.transverse.referentiel.qo.ParcelleQO;
-
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.validation.ConstraintViolationException;
 
@@ -21,10 +14,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import fr.gouv.beta.fabnum.commun.facade.dto.JsonInfoDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.ParcelleDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionParcelleFacade;
+import fr.gouv.beta.fabnum.kelrisks.transverse.referentiel.qo.ParcelleQO;
+
 @Validated
 public class AbstractBasicApi {
 
-	private final static String DEFAULT_PREFIXE = "000";
+	private static final String DEFAULT_PREFIXE = "000";
 
 	@Autowired
 	IGestionParcelleFacade gestionParcelleFacade;

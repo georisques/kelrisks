@@ -74,7 +74,8 @@ export default {
         bboxRisque: {
             type: Array,
             default: () => []
-        }
+        },
+        idPpr: {default: () => null}
     },
     methods: {
         crippleMap (ref) {
@@ -299,7 +300,7 @@ export default {
         },
         // ajout couche WMS a la carte
         addWmsLayer (ref, isDeletePreviousWmsLayer) {
-            console.log("addWmsLayer",ref)
+            console.log("addWmsLayer",ref, this.wmsLayer)
 
             // pour les PDF carte il y a une seule carte, il faut virer la couche WMS si elle deja presente sur la carte
             let map = this.$refs[ref].mapObject
@@ -348,6 +349,10 @@ export default {
                     paramsWms.x = this.maxZoomCenter[1];
                     paramsWms.y = this.maxZoomCenter[0];
                     paramsWms.rayon = 500; // metres
+                } else if (this.wmsLayer == confLayers.ppr_georisques.layer){
+                    paramsWms.idgaspar = this.idPpr;
+                } else if (this.wmsLayer == confLayers.ppr_gpu.layer){
+                    paramsWms.idassiette = this.idPpr;
                 }
 
                 L.nonTiledLayer.wms(wmsServerUrl,paramsWms).addTo(map)

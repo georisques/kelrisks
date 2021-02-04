@@ -55,6 +55,7 @@
                      :wms-servers="leafletWmsServers"
                      :codes-communes="leafletCodesCommunes"
                      :bbox-risque="leafletBboxRisque"
+                     :id-ppr="leafletIdPpr"
                      />
         </div>
     </div>
@@ -134,7 +135,11 @@ export default {
       leafletBboxRisque: {
         type: Array,
         default: () => []
-      }
+      },
+      leafletIdPpr: {
+          type: String,
+          default: null
+      },      
     },
     methods: {},
     computed: {

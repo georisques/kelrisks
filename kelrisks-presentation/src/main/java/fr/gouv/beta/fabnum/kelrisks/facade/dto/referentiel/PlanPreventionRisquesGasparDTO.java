@@ -24,5 +24,7 @@ public class PlanPreventionRisquesGasparDTO implements Serializable {
     private boolean      existsInGeorisque;
     private boolean      existsInGpu;
     private List<String> assiettes = new ArrayList<>();
+    private String       idAssietteErrial;
+    
 }
   

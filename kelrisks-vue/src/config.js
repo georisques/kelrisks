@@ -24,6 +24,14 @@ export const config = {
         canalisations: {
             layer: 'CANALISATIONS',
             serveurs: {'recette':'https://mapsrefrec.brgm.fr/wxs/georisques/errial_risques?','prod':'https://mapsref.brgm.fr/wxs/georisques/errial_risques?'}
-        }
+        },
+        ppr_georisques: {
+            layer: 'ppr_georisques',
+            serveurs: {'recette':'https://mapsrefrec.brgm.fr/wxs/georisques/errial_risques?','prod':'https://mapsref.brgm.fr/wxs/georisques/errial_risques?'}
+        },    
+        ppr_gpu: {
+            layer: 'ppr_gpu',
+            serveurs: {'recette':'https://mapsrefrec.brgm.fr/wxs/georisques/errial_risques?','prod':'https://mapsref.brgm.fr/wxs/georisques/errial_risques?'}
+        }    
     }
 }

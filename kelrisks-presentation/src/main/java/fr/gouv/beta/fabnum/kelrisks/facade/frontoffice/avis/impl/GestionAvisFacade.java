@@ -45,6 +45,7 @@ import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.avis.IGestionAvisFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionArgileFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionBRGMFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionCommuneFacade;
+import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGPUFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGeoDataGouvFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGeorisquesFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionIGNCartoFacade;
@@ -63,9 +64,8 @@ import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.GeorisquePaginatedRadon
 import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.GeorisquePaginatedSIS;
 import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.GeorisquePaginatedSismique;
 import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.GeorisquePaginatedTRI;
-import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.IGNCartoAssiettePaginatedFeatures;
-import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.IGNCartoAssiettePaginatedFeatures.Assiette;
-import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.IGNCartoGenerateurPaginatedFeatures;
+import fr.gouv.beta.fabnum.kelrisks.transverse.referentiel.entities.Assiette;
+import fr.gouv.beta.fabnum.kelrisks.transverse.referentiel.entities.Generateur;
 import fr.gouv.beta.fabnum.kelrisks.transverse.referentiel.enums.PrecisionEnum;
 import fr.gouv.beta.fabnum.kelrisks.transverse.referentiel.qo.PlanPreventionRisquesGasparQO;
 import lombok.extern.log4j.Log4j2;
@@ -91,7 +91,7 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
     @Autowired
     IGestionGeoDataGouvFacade                 gestionGeoDataGouvFacade;
     @Autowired
-    IGestionIGNCartoFacade                    gestionIGNCartoFacade;
+    IGestionGPUFacade                         gestionGPUFacade;
     @Autowired
     IGestionPlanExpositionBruitFacade         gestionPlanExpositionBruitFacade;
     @Autowired
@@ -310,11 +310,11 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         List<PlanPreventionRisquesGasparDTO> planPreventionRisquesList = removeDuplicatePPR(gaspars);
         avisDTO.setPlanPreventionRisquesDTOs((planPreventionRisquesList));
         
-        IGNCartoAssiettePaginatedFeatures assiettes = null;
+        List<Assiette> assiettes = null;
         if(isIGNRequested) {
         	try {
                 startTime = System.currentTimeMillis();
-                assiettes = gestionIGNCartoFacade.rechercherAssiettesContenantPolygon(parcelleSitesSolsPoluesGeoJson);
+                assiettes = gestionGPUFacade.rechercherAssiettesContenantPolygon(parcelleSitesSolsPoluesGeoJson);
                 log.info("time-rechercherAssiettesContenantPolygon: {}", (System.currentTimeMillis() - startTime));
         	} catch (Exception e) {
         		log.info("Fail to rechercherAssiettesContenantPolygon", e);
@@ -329,13 +329,12 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
             	// filtrer les résultats issus de la recherche d’assiettes de façon à n’envoyer des requêtes
             	// que sur les générateurs concerné par l’API Carto (PM1 et PM3)
             	Set<String> nameSet = new HashSet<>();
-            	List<Assiette> featuresDistinctByPartition = assiettes.getFeatures().stream()
-            	            .filter(e-> CATEGORIES_SUP.contains(e.getProperties().getSuptype().toLowerCase()))
-            	            .filter(e -> nameSet.add(e.getProperties().getPartition()))
+            	List<Assiette> featuresDistinctByPartition = assiettes.stream()
+            	            .filter(e -> nameSet.add(e.getPartition()))
             	            .collect(Collectors.toList());
             	
             	// Ajout des geom du GPU au PPR
-                for (IGNCartoAssiettePaginatedFeatures.Assiette assiette : featuresDistinctByPartition) {
+                for (Assiette assiette : featuresDistinctByPartition) {
                     getGenerateurs(planPreventionRisquesList, assiette);
                 }
             }
@@ -378,11 +377,11 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         return gestionPlanPreventionRisquesGasparFacade.rechercherAvecCritere(planPreventionRisquesGasparQO);
     }
     
-    private void getGenerateurs(List<PlanPreventionRisquesGasparDTO> planPreventionRisquesList, IGNCartoAssiettePaginatedFeatures. Assiette assiette) throws TimeoutException {
-    	IGNCartoGenerateurPaginatedFeatures generateurs = null;
+    private void getGenerateurs(List<PlanPreventionRisquesGasparDTO> planPreventionRisquesList, Assiette assiette) throws TimeoutException {
+    	List<Generateur> generateurs = null;
     	try {
         	long startTime = System.currentTimeMillis();
-            generateurs = gestionIGNCartoFacade.rechercherGenerateur(assiette.getProperties().getPartition());
+            generateurs = gestionGPUFacade.rechercherGenerateur(assiette.getPartition());
             log.info("time-rechercherGenerateur: {}", (System.currentTimeMillis() - startTime));
         } catch (Exception e) {
     		log.info("Fail to rechercherGenerateur",e);
@@ -392,16 +391,17 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         if (generateurs == null) { throw new TimeoutException("timeout-generateurs-null"); }
         
         // Sécurisation de la jointure assiette / générateur qui ne peut être faite via l'API GpU
-        generateurs.getFeatures().removeIf(generateur -> !generateur.getProperties().getIdgen().equalsIgnoreCase(assiette.getProperties().getIdgen()));
+        generateurs.removeIf(generateur -> !generateur.getIdgen().equalsIgnoreCase(assiette.getIdgen()));
         
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
 
         // Ajout la geometrie des assiettes au PPR
-        generateurs.getFeatures().forEach(generateur -> {
+        generateurs.forEach(generateur -> {
         	planPreventionRisquesList.forEach(ppr -> {
-        		if(ppr.getIdGaspar().equals(generateur.getProperties().getId_gaspar())) {
+        		if(ppr.getIdGaspar().equals(generateur.getIdGaspar())) {
         			ppr.setExistsInGpu(true);
-        			setGeomPPR(sdf, ppr, assiette.getGeometry());
+        			ppr.setIdAssietteErrial(assiette.getIdgen()+"_"+assiette.getPartition());
+        			setGeomPPR(sdf, ppr, assiette.getMultiPolygon());
         		}
         	});
         });

@@ -54,6 +54,7 @@
                                  :wms-servers="currentWmsServers"
                                  :codes-communes="this.avis.codesCommunes"
                                  :bbox-risque="this.avis.bboxParcelles"
+                                 :id-ppr="currentIdPpr"
                                  v-show="currentData !== ''"/>
                     </div>
                     <div id="pdf">
@@ -113,6 +114,7 @@ export default {
         currentPngName: '',
         currentWmsLayer: null,
         currentWmsServers: null,
+        currentIdPpr: null,
         pngList: [],
     }),
     methods: {
@@ -130,12 +132,17 @@ export default {
 
             for (let plan in this.avis.ppr) {
                 plan = this.avis.ppr[plan]
+                // id ppr en plus
                 this.dataList.push([
                     [{
                         data: plan.assiettes,
-                        color: '#840505'
+                        color: '#840505',
+                        opacity: 0
                     }],
-                    plan.alea.familleAlea.code])
+                    plan.alea.familleAlea.code,// FIXME peut etre lie au bug #82
+                    (!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.layer : conf.config.couchesRisques.ppr_gpu.layer),
+                    (!plan.existsInGeorisque && !plan.existsInGpu) ? null  : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.serveurs : conf.config.couchesRisques.ppr_gpu.serveurs),                    
+                    (!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? plan.idGaspar : plan.idAssietteErrial)])
             }
 
             if (this.hasSismicite) this.dataList.push([
@@ -234,9 +241,13 @@ export default {
                     if(data.length > 2){
                         this.currentWmsLayer = data[2]
                         this.currentWmsServers = data[3]
+                        if(data.length > 3){
+                            this.currentIdPpr = data[4]
+                        }
                     } else {
                         this.currentWmsLayer = null
                         this.currentWmsServers = null
+                        this.currentIdPpr = null
                     }
                     return
                 }
@@ -245,6 +256,7 @@ export default {
             this.currentData = ''
             this.currentWmsLayer = null
             this.currentWmsServers = null
+            this.currentIdPpr = null
             this.debounceFetchPdf()
         },
         fetchPdf () {

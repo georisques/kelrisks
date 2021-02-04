@@ -76,8 +76,11 @@
                                   '<a href=\'#recommendations_PPR\'>Lire les recommandations</a>'"
                     :parcelle="leaflet.data.parcelles"
                     :max-zoom-center="leaflet.center"
+                    :leaflet-wms-servers="(!plan.existsInGeorisque && !plan.existsInGpu) ? null  : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.serveurs : conf.config.couchesRisques.ppr_gpu.serveurs)"
+                    :leaflet-wms-layer="(!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.layer : conf.config.couchesRisques.ppr_gpu.layer)"
+                    :leaflet-id-ppr="(!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? plan.idGaspar : plan.idAssietteErrial)"
                     :leaflet-data="[{ data : plan.assiettes,
-                                      color : '#840505'}]"
+                                      color : '#840505', opacity: 0}]"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/'+ getLogoRisque(plan.alea.familleAlea.code) +'.png'"
                     :title="plan.alea.familleAlea.libelle"
                     style="font-size: 20px; color: #2C3E50;"
