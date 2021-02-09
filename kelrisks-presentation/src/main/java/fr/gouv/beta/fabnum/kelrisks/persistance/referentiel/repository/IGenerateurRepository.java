@@ -14,4 +14,6 @@ public interface IGenerateurRepository extends JpaRepository<Generateur, Long>, 
 	List<Generateur> findByPartitionAndIdgen(String partition, String idgen);
 
 	List<Generateur> findByPartition(String partition);
+	
+	long countByIdGaspar(String idGaspar);
 }

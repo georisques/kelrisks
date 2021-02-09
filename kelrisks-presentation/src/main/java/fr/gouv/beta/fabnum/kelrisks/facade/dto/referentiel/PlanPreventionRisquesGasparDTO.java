@@ -21,8 +21,12 @@ public class PlanPreventionRisquesGasparDTO implements Serializable {
     private Date         dateApprobation;
     private Date         dateAbrogation;
     private Long         id;
+    // si la parcelle est sur un PPR de Georisques
     private boolean      existsInGeorisque;
+    // si la parcelle est un PPR du GPU
     private boolean      existsInGpu;
+    // si ce gaspar a une carte dans le GPU ou Georisques
+    private boolean      existsCarte;
     private List<String> assiettes = new ArrayList<>();
     private String       idAssietteErrial;
     

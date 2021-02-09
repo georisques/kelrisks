@@ -23,6 +23,11 @@ public class GestionGPUFacade extends AbstractFacade implements IGestionGPUFacad
 	}
 
 	@Override
+	public long rechercherCarteGenerateur(String idGaspar) {
+		return gpuService.rechercherCarteGenerateur(idGaspar);
+	}
+	
+	@Override
 	public List<Generateur> rechercherGenerateur(String partition, String idgen) {
 		return gpuService.rechercherGenerateur(partition, idgen);
 	}

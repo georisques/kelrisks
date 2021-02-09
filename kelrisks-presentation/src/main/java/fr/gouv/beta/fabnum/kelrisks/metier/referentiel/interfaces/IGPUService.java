@@ -12,4 +12,6 @@ public interface IGPUService {
     List<Generateur> rechercherGenerateur(String partition, String idgen);
 
 	List<Generateur> rechercherGenerateur(String partition);
+
+	long rechercherCarteGenerateur(String idGaspar);
 }

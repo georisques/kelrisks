@@ -18,8 +18,10 @@ import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.Point;
+import org.geolatte.geom.Position;
 import org.geolatte.geom.crs.CoordinateSystemAxis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -48,7 +50,6 @@ import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionCommu
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGPUFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGeoDataGouvFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGeorisquesFacade;
-import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionIGNCartoFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionInstallationClasseeFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionParcelleFacade;
 import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionPlanExpositionBruitFacade;
@@ -100,9 +101,6 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
     IGestionBRGMFacade                        gestionBRGMFacade;
     
     
-    // API Carto IGN filter for categories
-    private static final List<String> CATEGORIES_SUP = Arrays.asList("pm1", "pm3");
-    
     private List<String> arrondissementsMarseille =
             Stream.of("13201", "13202", "13203", "13204", "13205", "13206", "13207", "13208", "13209", "13210", "13211", "13212", "13213", "13214", "13215", "13216").collect(Collectors.toList());
     private List<String> arrondissementsLyon =
@@ -141,9 +139,9 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         parcelleDTO.setEwkt(GeoJsonUtils.toGeoJson(geometry));
     
         Point<?> centroid = (Point<?>) gestionParcelleFacade.rechercherCentroidParcelle(geometry);
-    
-        CommuneDTO communeDTO = gestionGeoDataGouvFacade.rechercherCommune(Double.toString(((Point) centroid).getPosition().getCoordinate(CoordinateSystemAxis.mkLatAxis())),
-                                                                           Double.toString(((Point) centroid).getPosition().getCoordinate(CoordinateSystemAxis.mkLonAxis())));
+        Position ptCentroid = ((Point) centroid).getPosition();
+        CommuneDTO communeDTO = gestionGeoDataGouvFacade.rechercherCommune(Double.toString(ptCentroid.getCoordinate(CoordinateSystemAxis.mkLatAxis())),
+                                                                           Double.toString(ptCentroid.getCoordinate(CoordinateSystemAxis.mkLonAxis())));
     
         avisDTO.getSummary().setCommune(communeDTO);
     
@@ -169,13 +167,17 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
             log.info((System.currentTimeMillis() - startTime) + " => " + "rechercherExpendedParcelle");
             startTime = System.currentTimeMillis();
             Point<?> centroid = (Point<?>) gestionParcelleFacade.rechercherCentroidParcelle(parcellesUnion);
+            Position ptCentroid = centroid.getPositionN(0);
+            double longitudeCentroid = ptCentroid.getCoordinate(CoordinateSystemAxis.mkLonAxis());
+            double latitudeCentroid = ptCentroid.getCoordinate(CoordinateSystemAxis.mkLatAxis());
+            
             log.info((System.currentTimeMillis() - startTime) + " => " + "rechercherCentroidParcelle (" +
-                               centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis()) + ", " +
-                               centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis()) + ")");
+            		longitudeCentroid + ", " +
+            		latitudeCentroid+ ")");
             startTime = System.currentTimeMillis();
         
-            avisDTO.getLeaflet().setCenter(new AvisDTO.Leaflet.Point(Double.toString(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis())),
-                                                                     Double.toString(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis()))));
+            avisDTO.getLeaflet().setCenter(new AvisDTO.Leaflet.Point(Double.toString(longitudeCentroid),
+                                                                     Double.toString(latitudeCentroid)));
         
             avisDTO.getSummary().setCodeParcelle(parcelleDTOs.stream()
                                                          .map(parcelleDTO -> parcelleDTO.getPrefixe() + "-" + parcelleDTO.getSection() + "-" + parcelleDTO.getNumero())
@@ -205,11 +207,11 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
             log.info((System.currentTimeMillis() - startTime) + " => " + "getAvisICPE");
             startTime = System.currentTimeMillis();
         
-            getAvisSis(avisDTO, centroid);
+            getAvisSis(avisDTO, longitudeCentroid, latitudeCentroid);
             log.info((System.currentTimeMillis() - startTime) + " => " + "getAvisSis");
             startTime = System.currentTimeMillis();
         
-            getAvisPPR(avisDTO, parcelleSitesSolsPolues, centroid, communeDTO.getCodeINSEE(), isIGNRequested, isPPRRequested);
+            getAvisPPR(avisDTO, parcelleSitesSolsPolues, longitudeCentroid, latitudeCentroid, communeDTO.getCodeINSEE(), isIGNRequested, isPPRRequested);
             log.info((System.currentTimeMillis() - startTime) + " => " + "getAvisPPR");
             startTime = System.currentTimeMillis();
         
@@ -233,7 +235,7 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
             log.info((System.currentTimeMillis() - startTime) + " => " + "getAvisRadon");
             startTime = System.currentTimeMillis();
         
-            getAvisCanalisations(avisDTO, centroid);
+            getAvisCanalisations(avisDTO, longitudeCentroid, latitudeCentroid);
             log.info((System.currentTimeMillis() - startTime) + " => " + "getAvisCanalisations");
             startTime = System.currentTimeMillis();
         
@@ -241,7 +243,7 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
             log.info((System.currentTimeMillis() - startTime) + " => " + "getAvisPlanExpositionBruit");
             startTime = System.currentTimeMillis();
         
-            getAvisInstallationsNucleaires(avisDTO, centroid);
+            getAvisInstallationsNucleaires(avisDTO, longitudeCentroid, latitudeCentroid);
             log.info((System.currentTimeMillis() - startTime) + " => " + "getAvisInstallationsNucleaires");
         
             return avisDTO;
@@ -260,13 +262,12 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         }
     }
     
-    private void getAvisSis(AvisDTO avisDTO, Point<?> centroid) {
+    private void getAvisSis(AvisDTO avisDTO, double longitudeCentroid, double latitudeCentroid) {
         
-        GeorisquePaginatedSIS georisquePaginatedSisParcelle = gestionGeorisquesFacade.rechercherSisCoordonnees(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis()),
-                                                                                                               centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis()));
-        GeorisquePaginatedSIS georisquePaginatedSisRayonParcelle = gestionGeorisquesFacade.rechercherSisCoordonneesRayon(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis()),
-                                                                                                                         centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis()),
-                                                                                                                         100);
+        GeorisquePaginatedSIS georisquePaginatedSisParcelle = gestionGeorisquesFacade.rechercherSisCoordonnees(longitudeCentroid,
+        		latitudeCentroid);
+        GeorisquePaginatedSIS georisquePaginatedSisRayonParcelle = gestionGeorisquesFacade.rechercherSisCoordonneesRayon(longitudeCentroid,
+        		latitudeCentroid, 100);
         
         if (!georisquePaginatedSisParcelle.getData().isEmpty()) {
     
@@ -296,7 +297,7 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         }
     }
     
-    private void getAvisPPR(AvisDTO avisDTO, List<Geometry<?>> parcelleSitesSolsPolues, Point<?> centroid, String codeINSEE, boolean isIGNRequested, boolean isPPRRequested) {
+    private void getAvisPPR(AvisDTO avisDTO, List<Geometry<?>> parcelleSitesSolsPolues, double longitudeCentroid, double latitudeCentroid, String codeINSEE, boolean isIGNRequested, boolean isPPRRequested) {
         
         long startTime = System.currentTimeMillis();
         
@@ -308,64 +309,90 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         	gaspars.addAll(rechercherPprsGaspar(codeArrondissement));
         }
         List<PlanPreventionRisquesGasparDTO> planPreventionRisquesList = removeDuplicatePPR(gaspars);
-        avisDTO.setPlanPreventionRisquesDTOs((planPreventionRisquesList));
         
-        List<Assiette> assiettes = null;
-        if(isIGNRequested) {
-        	try {
-                startTime = System.currentTimeMillis();
-                assiettes = gestionGPUFacade.rechercherAssiettesContenantPolygon(parcelleSitesSolsPoluesGeoJson);
-                log.info("time-rechercherAssiettesContenantPolygon: {}", (System.currentTimeMillis() - startTime));
-        	} catch (Exception e) {
-        		log.info("Fail to rechercherAssiettesContenantPolygon", e);
-			}
-        }
-       
-        // dans le cas ou le service de l'IGN a une reponse vide avec un code 200, les assiettes sont pas nulles mais les features oui.
-        if(assiettes != null) {
+        if(!planPreventionRisquesList.isEmpty()) {
+            // 1) Verifier si il existe une carte dans le GPU ou dans Georisques
+            List<String> idGasparGeorisques = new ArrayList<>();
+
             try {
-            	// suppression des doublons et filtre pour ne conserver que PM1 et PM3
-            	// cf mail de l'IGN :
-            	// filtrer les résultats issus de la recherche d’assiettes de façon à n’envoyer des requêtes
-            	// que sur les générateurs concerné par l’API Carto (PM1 et PM3)
-            	Set<String> nameSet = new HashSet<>();
-            	List<Assiette> featuresDistinctByPartition = assiettes.stream()
-            	            .filter(e -> nameSet.add(e.getPartition()))
-            	            .collect(Collectors.toList());
-            	
-            	// Ajout des geom du GPU au PPR
-                for (Assiette assiette : featuresDistinctByPartition) {
-                    getGenerateurs(planPreventionRisquesList, assiette);
+                GeorisquePaginatedPPR pprGeorisques = gestionGeorisquesFacade.rechercherPprCommune(codeINSEE);
+                // pour trouver les PPR dans Georisques
+                if(pprGeorisques != null && !pprGeorisques.getData().isEmpty()) {
+                	idGasparGeorisques = pprGeorisques.getData().stream().map(ppr -> ppr.getId_gaspar()).collect(Collectors.toList());
+                }
+            } catch (Exception e) {
+				log.error("Fail to rechercherPprCommune", e);
+			} 
+
+            rechercheCartesPPR(planPreventionRisquesList, idGasparGeorisques);
+            
+            // 2) Recherche spatiale à la parcelle sur GPU et Georisques
+            List<Assiette> assiettes = null;
+            if(isIGNRequested) {
+            	try {
+                    startTime = System.currentTimeMillis();
+                    assiettes = gestionGPUFacade.rechercherAssiettesContenantPolygon(parcelleSitesSolsPoluesGeoJson);
+                    log.info("time-rechercherAssiettesContenantPolygon: {}", (System.currentTimeMillis() - startTime));
+            	} catch (Exception e) {
+            		log.error("Fail to rechercherAssiettesContenantPolygon", e);
+    			}
+            }
+           
+            // dans le cas ou le service de l'IGN a une reponse vide avec un code 200, les assiettes sont pas nulles mais les features oui.
+            if(assiettes != null) {
+                try {
+                	// suppression des doublons et filtre pour ne conserver que PM1 et PM3
+                	// cf mail de l'IGN :
+                	// filtrer les résultats issus de la recherche d’assiettes de façon à n’envoyer des requêtes
+                	// que sur les générateurs concerné par l’API Carto (PM1 et PM3)
+                	Set<String> nameSet = new HashSet<>();
+                	List<Assiette> featuresDistinctByPartition = assiettes.stream()
+                	            .filter(e -> nameSet.add(e.getPartition()))
+                	            .collect(Collectors.toList());
+                	
+                	// Ajout des geom du GPU au PPR
+                    for (Assiette assiette : featuresDistinctByPartition) {
+                        getGenerateurs(planPreventionRisquesList, assiette);
+                    }
+                }
+                catch (TimeoutException e) {
+            		log.error("Fail to getGenerateurs", e);
                 }
             }
-            catch (TimeoutException e) {
+                  
+            GeorisquePaginatedPPR georisquePaginatedPPR = null;
+            // TODO : si tous les ppr gaspar on deja une geom, pas besoin d'appeler l'API Géorisques PPR
+            if(isPPRRequested && CollectionUtils.isNotEmpty(idGasparGeorisques)) {
+                startTime = System.currentTimeMillis();
+                try {
+					georisquePaginatedPPR = gestionGeorisquesFacade.rechercherPprCoordonnees(longitudeCentroid,
+							latitudeCentroid);
+				} catch (Exception e) {
+            		log.error("Fail to rechercherPprCoordonnees", e);
+				}
+                 log.info("time-rechercherPprCoordonnees: {}", (System.currentTimeMillis() - startTime));
+                 
+         		if (georisquePaginatedPPR != null && !georisquePaginatedPPR.getData().isEmpty()) {
+         	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
+
+                    georisquePaginatedPPR.getData().forEach(geoRisquesPPR -> {
+                    	planPreventionRisquesList.forEach(ppr -> {
+                    		// si le PPR n'a pas deja les geom du GPU
+                    		// Rue Basse Mouillere, orleans
+                    		if(ppr.getAssiettes().isEmpty() && ppr.getIdGaspar().equals(geoRisquesPPR.getId_gaspar())) {
+                    			ppr.setExistsInGeorisque(true);
+                    			setGeomPPR(sdf, ppr, geoRisquesPPR.getGeom_perimetre());
+                    		}
+                    	});
+                    });
+               } 
             }
+            
+            // 3) supprimer les PPR qui on une carte mais dont la parcelle n'est pas dessus
+            planPreventionRisquesList.removeIf(ppr -> (ppr.isExistsCarte() && (!ppr.isExistsInGpu() && !ppr.isExistsInGeorisque())));        	
         }
-              
-        GeorisquePaginatedPPR georisquePaginatedPPR = null;
-        // TODO : si tous les ppr gaspar on deja une geom, pas besoin d'appeler l'API Géorisques PPR
-        if(isPPRRequested) {
-            startTime = System.currentTimeMillis();
 
-             georisquePaginatedPPR = gestionGeorisquesFacade.rechercherPprCoordonnees(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis()),
-                    centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis()));
-             log.info("time-rechercherPprCoordonnees: {}", (System.currentTimeMillis() - startTime));
-             
-     		if (georisquePaginatedPPR != null && !georisquePaginatedPPR.getData().isEmpty()) {
-     	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
-
-                georisquePaginatedPPR.getData().forEach(geoRisquesPPR -> {
-                	planPreventionRisquesList.forEach(ppr -> {
-                		// si le PPR n'a pas deja les geom du GPU
-                		// Rue Basse Mouillere, orleans
-                		if(ppr.getAssiettes().isEmpty() && ppr.getIdGaspar().equals(geoRisquesPPR.getId_gaspar())) {
-                			ppr.setExistsInGeorisque(true);
-                			setGeomPPR(sdf, ppr, geoRisquesPPR.getGeom_perimetre());
-                		}
-                	});
-                });
-           } 
-        }
+        avisDTO.setPlanPreventionRisquesDTOs(planPreventionRisquesList);
     }
     
     private List<PlanPreventionRisquesGasparDTO> rechercherPprsGaspar(String codeInsee) {
@@ -384,7 +411,7 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
             generateurs = gestionGPUFacade.rechercherGenerateur(assiette.getPartition());
             log.info("time-rechercherGenerateur: {}", (System.currentTimeMillis() - startTime));
         } catch (Exception e) {
-    		log.info("Fail to rechercherGenerateur",e);
+    		log.error("Fail to rechercherGenerateur",e);
 		}
 
 
@@ -416,11 +443,11 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
 	    ppr.getAssiettes().add(GeoJsonUtils.toGeoJson(geom, properties));
     }
     
-    private void getAvisCanalisations(AvisDTO avisDTO, Point<?> centroid) {
+    private void getAvisCanalisations(AvisDTO avisDTO, double longitudeCentroid, double latitudeCentroid) {
         
         BRGMPaginatedCanalisation brgmPaginatedCanalisation =
-                gestionBRGMFacade.rechercherCanalisationsCoordonnees(String.valueOf(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis())),
-                                                                     String.valueOf(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis())),
+                gestionBRGMFacade.rechercherCanalisationsCoordonnees(String.valueOf(longitudeCentroid),
+                                                                     String.valueOf(latitudeCentroid),
                                                                      500);
     
         if (brgmPaginatedCanalisation != null) {
@@ -429,25 +456,25 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         }
     }
     
-    private void getAvisInstallationsNucleaires(AvisDTO avisDTO, Point<?> centroid) {
+    private void getAvisInstallationsNucleaires(AvisDTO avisDTO, double longitudeCentroid, double latitudeCentroid) {
         
         List<InstallationNucleaireDTO> installationNucleaireDTOS = new ArrayList<>();
         
-        installationNucleaireDTOS.addAll(getCentralesNucleaires(centroid));
+        installationNucleaireDTOS.addAll(getCentralesNucleaires(longitudeCentroid, latitudeCentroid));
         avisDTO.setHasCentraleNucleaire(!installationNucleaireDTOS.isEmpty());
         
-        installationNucleaireDTOS.addAll(getInstallationsNucleaires(centroid));
+        installationNucleaireDTOS.addAll(getInstallationsNucleaires(longitudeCentroid, latitudeCentroid));
         
         avisDTO.setInstallationNucleaireDTOS(installationNucleaireDTOS);
     }
     
-    private List<InstallationNucleaireDTO> getCentralesNucleaires(Point<?> centroid) {
+    private List<InstallationNucleaireDTO> getCentralesNucleaires(double longitudeCentroid, double latitudeCentroid) {
         
         List<InstallationNucleaireDTO> installationNucleaireDTOS = new ArrayList<>();
         
         BRGMPaginatedInstallationNuclaire brgmPaginatedInstallationNuclaire20 =
-                gestionBRGMFacade.rechercherInstallationsNucleairesCoordonnees(String.valueOf(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis())),
-                                                                               String.valueOf(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis())),
+                gestionBRGMFacade.rechercherInstallationsNucleairesCoordonnees(String.valueOf(longitudeCentroid),
+                                                                               String.valueOf(latitudeCentroid),
                                                                                20000);
         
         if (brgmPaginatedInstallationNuclaire20 != null) {
@@ -469,13 +496,13 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         return installationNucleaireDTOS;
     }
     
-    private List<InstallationNucleaireDTO> getInstallationsNucleaires(Point<?> centroid) {
+    private List<InstallationNucleaireDTO> getInstallationsNucleaires(double longitudeCentroid, double latitudeCentroid) {
         
         List<InstallationNucleaireDTO> installationNucleaireDTOS = new ArrayList<>();
         
         BRGMPaginatedInstallationNuclaire brgmPaginatedInstallationNuclaire10 =
-                gestionBRGMFacade.rechercherInstallationsNucleairesCoordonnees(String.valueOf(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLonAxis())),
-                                                                               String.valueOf(centroid.getPositionN(0).getCoordinate(CoordinateSystemAxis.mkLatAxis())),
+                gestionBRGMFacade.rechercherInstallationsNucleairesCoordonnees(String.valueOf(longitudeCentroid),
+                                                                               String.valueOf(latitudeCentroid),
                                                                                10000);
         
         if (brgmPaginatedInstallationNuclaire10 != null) {
@@ -666,7 +693,7 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
 				
 				String idPPR = ppr.getCodeINSEE() + "_" + ppr.getIdGaspar() + "_" + codeFamille;
 				if (!idPPRs.contains(idPPR)) {
-					// ne tient plus compte des infos boolean de la base
+					// ne tient plus compte des infos boolean de la base car on ne sait pas remplir correctement les valeurs...
 					ppr.setExistsInGeorisque(false);
 					ppr.setExistsInGpu(false);
 					filterPPRs.add(ppr);
@@ -676,6 +703,17 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
 		}
 
 		return filterPPRs;
+	}
+	
+	public void rechercheCartesPPR(List<PlanPreventionRisquesGasparDTO> pprs, List<String> idGasparGeorisques) {
+		for(PlanPreventionRisquesGasparDTO ppr : pprs) {
+			String idGaspar = ppr.getIdGaspar();
+			long nbCarteGeneration = gestionGPUFacade.rechercherCarteGenerateur(idGaspar);
+			
+			if(nbCarteGeneration > 0 || idGasparGeorisques.contains(idGaspar)) {
+				ppr.setExistsCarte(true);
+			}
+		}
 	}
 	
     private String getEquivalenceInseeArrondissmentCommune(String codeINSEE) {

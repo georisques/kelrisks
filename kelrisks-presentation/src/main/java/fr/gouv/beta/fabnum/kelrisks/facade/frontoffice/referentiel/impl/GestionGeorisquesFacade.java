@@ -62,4 +62,10 @@ public class GestionGeorisquesFacade extends AbstractFacade implements IGestionG
     
         return georisquesService.rechercherPprCoordonnees(String.valueOf(lon), String.valueOf(lat), 1);
     }
+
+	@Override
+	public GeorisquePaginatedPPR rechercherPprCommune(String codeINSEE) {
+		
+        return georisquesService.rechercherPprCommune(codeINSEE);
+	}
 }

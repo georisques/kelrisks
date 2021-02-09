@@ -13,4 +13,5 @@ public interface IGestionGPUFacade {
 	
     List<Generateur> rechercherGenerateur(String partition);
 
+    long rechercherCarteGenerateur(String idGaspar);
 }

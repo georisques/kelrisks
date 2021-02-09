@@ -38,4 +38,9 @@ public class GPUService implements IGPUService {
 	public List<Generateur> rechercherGenerateur(String partition) {
 		return repoGenerateur.findByPartition(partition);
 	}
+
+	@Override
+	public long rechercherCarteGenerateur(String idGaspar) {
+		return repoGenerateur.countByIdGaspar(idGaspar);
+	}
 }

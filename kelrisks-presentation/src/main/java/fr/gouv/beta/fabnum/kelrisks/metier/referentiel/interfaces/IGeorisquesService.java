@@ -23,4 +23,6 @@ public interface IGeorisquesService {
     GeorisquePaginatedSIS rechercherSisCoordonnees(String lon, String lat, int rayon);
     
     GeorisquePaginatedPPR rechercherPprCoordonnees(String lon, String lat, int rayon);
+
+	GeorisquePaginatedPPR rechercherPprCommune(String codeInsee);
 }

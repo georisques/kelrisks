@@ -25,4 +25,7 @@ public interface IGestionGeorisquesFacade {
     GeorisquePaginatedAZI rechercherAZICommune(String codeINSEE);
     
     GeorisquePaginatedTRI rechercherTRICommune(String codeINSEE);
+    
+    GeorisquePaginatedPPR rechercherPprCommune(String codeINSEE);
+    
 }

@@ -190,4 +190,27 @@ public class GeorisquesService implements IGeorisquesService {
                        })
                        .block();
     }
+    
+    @Override
+    public GeorisquePaginatedPPR rechercherPprCommune(String codeInsee) {
+        UriBuilder uriBuilder = UriBuilder.fromPath(getAPIUrl() + PPR_URL);
+        URI generateurUri = uriBuilder
+                                    .queryParam("code_insee", "{codeInsee}")
+                                    .queryParam("page", "1")
+                                    .queryParam("page_size", "20")
+                                    .build(codeInsee);
+        log.info("PPR commune API: {}",generateurUri);
+    
+        return webClient.get()
+                       .uri(generateurUri)
+                       .accept(MediaType.APPLICATION_JSON)
+                       .retrieve()
+                       .bodyToMono(GeorisquePaginatedPPR.class)
+                       .onErrorResume(e -> {
+                           log.error("PPR_URL: {}",generateurUri);
+                    	   log.error("Fail API Georisques rechercherPprCommune: {}", e.getLocalizedMessage());
+                           return Mono.just(new GeorisquePaginatedPPR());
+                       })
+                       .block();
+    }
 }
