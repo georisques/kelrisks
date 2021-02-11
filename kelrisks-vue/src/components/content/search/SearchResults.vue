@@ -70,8 +70,8 @@
                                   (plan.datePrescription ? 'Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d\'élaboration.' : '') +
                                   (plan.dateApplicationAnticipee ? 'Un PPR anticipé est un PPR non encore approuvé mais dont les règles sont  déjà à appliquer, par anticipation.' : '') +
                                   '<br/><br/>' +
-                                  (plan.alea.familleAlea.famillePPR.code === 'PPRN' ? 'Le plan de prévention des Risques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d’urbanisme héritées du passé et de mieux encadrer l’urbanisation future autour du site.<br/>' : '') +
-                                  (plan.alea.familleAlea.famillePPR.code === 'PPRM' ? 'Le plan de prévention des Risques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d’urbanisme héritées du passé et de mieux encadrer l’urbanisation future autour du site.<br/>' : '') +
+                                  (plan.alea.familleAlea.famillePPR.code === 'PPRN' ? 'Le plan de prévention des risques est un document réalisé par l’Etat qui interdit de construire dans les zones les plus exposées et encadre les constructions dans les autres zones exposées.<br/>' : '') +
+                                  (plan.alea.familleAlea.famillePPR.code === 'PPRM' ? 'Le plan de prévention des risques est un document réalisé par l’Etat qui interdit de construire dans les zones les plus exposées et encadre les constructions dans les autres zones exposées.<br/>' : '') +
                                   (plan.alea.familleAlea.famillePPR.code === 'PPRT' ? 'Le plan de prévention des risques technologiques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d’urbanisme héritées du passé et de mieux encadrer l’urbanisation future autour du site.<br/>' : '') +
                                   '<a href=\'#recommendations_PPR\'>Lire les recommandations</a>'"
                     :parcelle="leaflet.data.parcelles"

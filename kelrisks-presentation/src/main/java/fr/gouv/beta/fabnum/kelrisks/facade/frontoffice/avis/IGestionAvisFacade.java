@@ -11,4 +11,6 @@ public interface IGestionAvisFacade {
     AvisDTO rendreAvis(List<ParcelleDTO> parcelleDTOs, CommuneDTO communeDTO, String nomAdresse, boolean isIGNRequested, boolean isPPRRequested);
     
     AvisDTO rendreAvis(String geoJson);
+
+	String getEquivalenceInseeArrondissmentCommune(String codeINSEE);
 }

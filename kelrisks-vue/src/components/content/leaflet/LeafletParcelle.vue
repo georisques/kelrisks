@@ -2,9 +2,10 @@
     <div class="leaflet">
         <l-map :center="center"
                :zoom="18"
-               :options="{attributionControl: false}"
+               :options="{attributionControl: false, zoomControl: false}"
                ref="leafletParcelles">
             <l-tile-layer :url="url"/>
+            <l-control-zoom zoomInTitle="Vue rapprochée" zoomOutTitle="Vue éloignée" position="topleft"></l-control-zoom>
             <l-geo-json :geojson="parseJSONMap(data.parcelles)"
                         :options="parcellesOptions"
                         :options-style="parcellesStyleFunction"
@@ -18,7 +19,7 @@
 </template>
 
 <script>
-import {LGeoJson, LMap, LMarker, LTileLayer} from 'vue2-leaflet';
+import {LGeoJson, LMap, LMarker, LTileLayer, LControlZoom} from 'vue2-leaflet';
 import fetchWithError from "../../../script/fetchWithError";
 import {icon} from "leaflet";
 import mixinLeaflet from "./leaflet_common";
@@ -30,7 +31,8 @@ export default {
         LMap,
         LTileLayer,
         LMarker,
-        LGeoJson
+        LGeoJson,
+        LControlZoom
     },
     props: {
         center: {

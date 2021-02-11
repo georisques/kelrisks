@@ -716,7 +716,8 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
 		}
 	}
 	
-    private String getEquivalenceInseeArrondissmentCommune(String codeINSEE) {
+	@Override
+    public String getEquivalenceInseeArrondissmentCommune(String codeINSEE) {
         
         if (arrondissementsMarseille.contains(codeINSEE)) { return "13055"; }
         if (arrondissementsLyon.contains(codeINSEE)) { return "69123"; }

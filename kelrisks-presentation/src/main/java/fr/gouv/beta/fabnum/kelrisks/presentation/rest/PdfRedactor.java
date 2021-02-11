@@ -1,23 +1,5 @@
 package fr.gouv.beta.fabnum.kelrisks.presentation.rest;
 
-import fr.gouv.beta.fabnum.commun.metier.util.QRCodeUtils;
-import fr.gouv.beta.fabnum.commun.metier.util.SecurityHelper;
-import fr.gouv.beta.fabnum.kelrisks.facade.avis.AvisDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.AleaDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.CommuneDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.FamilleAleaDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.InstallationClasseeDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.InstallationNucleaireDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.PlanPreventionRisquesGasparDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.SecteurInformationSolDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.SiteIndustrielBasiasDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.SiteIndustrielBasolDTO;
-import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionCommuneFacade;
-import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGeorisquesFacade;
-import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.GeorisquePaginatedCatNat;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -36,6 +18,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fr.gouv.beta.fabnum.commun.metier.util.QRCodeUtils;
+import fr.gouv.beta.fabnum.commun.metier.util.SecurityHelper;
+import fr.gouv.beta.fabnum.kelrisks.facade.avis.AvisDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.AleaDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.CommuneDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.FamilleAleaDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.InstallationClasseeDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.InstallationNucleaireDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.PlanPreventionRisquesGasparDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.SecteurInformationSolDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.SiteIndustrielBasiasDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.dto.referentiel.SiteIndustrielBasolDTO;
+import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.avis.IGestionAvisFacade;
+import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionCommuneFacade;
+import fr.gouv.beta.fabnum.kelrisks.facade.frontoffice.referentiel.IGestionGeorisquesFacade;
+import fr.gouv.beta.fabnum.kelrisks.transverse.apiclient.GeorisquePaginatedCatNat;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 @Component
 public class PdfRedactor {
     
@@ -48,6 +49,8 @@ public class PdfRedactor {
     @Value("${kelrisks.app.back.local.path}")
     String                   localAppPath;
 
+    @Autowired
+    IGestionAvisFacade    gestionAvisFacade;
     @Autowired
     IGestionCommuneFacade    gestionCommuneFacade;
     @Autowired
@@ -281,7 +284,7 @@ public class PdfRedactor {
     
     private void redigerAnnexe2ArretesCatNat(Document htmlDocument, AvisDTO avisDTO) {
     
-        GeorisquePaginatedCatNat georisquePaginatedCatNat = gestionGeorisquesFacade.rechercherCatNatCommune(avisDTO.getSummary().getCommune().getCodeINSEE());
+        GeorisquePaginatedCatNat georisquePaginatedCatNat = gestionGeorisquesFacade.rechercherCatNatCommune(gestionAvisFacade.getEquivalenceInseeArrondissmentCommune(avisDTO.getSummary().getCommune().getCodeINSEE()));
     
         if (georisquePaginatedCatNat.getData().isEmpty()) { return; }
     
@@ -763,8 +766,7 @@ public class PdfRedactor {
                             (familleAlea.getFamillePPR().getCode().equals("PPRT") ?
                              "Le plan de prévention des risques technologiques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d’urbanisme" +
                              " héritées du passé et de mieux encadrer l’urbanisation future autour du site." :
-                             "Le plan de prévention des risques est un document réalisé par l’État qui a pour objectif de résoudre les situations difficiles en matière d'urbanisme héritées du " +
-                             "passé et de mieux encadrer l'urbanisation future autour du site.") +
+                             "Le plan de prévention des risques est un document réalisé par l'Etat qui interdit de construire dans les zones les plus exposées et encadre les constructions dans les autres zones exposées.") +
                             "</p>"
                     );
         		} else {
