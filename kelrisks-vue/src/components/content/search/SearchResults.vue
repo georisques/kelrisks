@@ -67,7 +67,7 @@
                                   (plan.dateApplicationAnticipee ? ', anticipé le ' + formatDate(plan.dateApplicationAnticipee) : '') +
                                   '.<br/>' +
                                   (plan.dateApprobation ? 'Un PPR approuvé est un PPR définitivement adopté. ' : '') +
-                                  (plan.datePrescription ? 'Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d\'élaboration.' : '') +
+                                  ((plan.datePrescription && plan.dateApprobation == null ) ? 'Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d\'élaboration.' : '') +
                                   (plan.dateApplicationAnticipee ? 'Un PPR anticipé est un PPR non encore approuvé mais dont les règles sont  déjà à appliquer, par anticipation.' : '') +
                                   '<br/><br/>' +
                                   (plan.alea.familleAlea.famillePPR.code === 'PPRN' ? 'Le plan de prévention des risques est un document réalisé par l’Etat qui interdit de construire dans les zones les plus exposées et encadre les constructions dans les autres zones exposées.<br/>' : '') +

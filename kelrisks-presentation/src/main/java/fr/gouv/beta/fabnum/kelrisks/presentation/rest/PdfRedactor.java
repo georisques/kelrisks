@@ -759,7 +759,7 @@ public class PdfRedactor {
                             (ppr.getDateApplicationAnticipee() != null ? ", anticipé le " + sdf.format(ppr.getDateApplicationAnticipee()) : "") +
                             ".<br/>" +
                             (ppr.getDateApprobation() != null ? "Un PPR approuvé est un PPR définitivement adopté. " : "") +
-                            (ppr.getDatePrescription() != null ? "Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d’élaboration." :
+                            ((ppr.getDatePrescription() != null && ppr.getDateApprobation() == null)? "Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d’élaboration." :
                              "") +
                             (ppr.getDateApplicationAnticipee() != null ? "Un PPR anticipé est un PPR non encore approuvé mais dont les règles sont  déjà à appliquer, par anticipation." : "") +
                             "<br/><br/>" +
@@ -781,7 +781,7 @@ public class PdfRedactor {
                                (ppr.getDateApplicationAnticipee() != null ? ", anticipé le " + sdf.format(ppr.getDateApplicationAnticipee()) : "") +
                                ".<br/>" +
                                (ppr.getDateApprobation() != null ? "Un PPR approuvé est un PPR définitivement adopté. " : "") +
-                               (ppr.getDatePrescription() != null ? "Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d’élaboration." :
+                               ((ppr.getDatePrescription() != null && ppr.getDateApprobation() == null)? "Un PPR prescrit est un PPR en cours d’élaboration sur la commune dont le périmètre et les règles sont en cours d’élaboration." :
                                 "") +
                                (ppr.getDateApplicationAnticipee() != null ? "Un PPR anticipé est un PPR non encore approuvé mais dont les règles sont  déjà à appliquer, par anticipation." : "") +
                                "<br/><br/>" 
