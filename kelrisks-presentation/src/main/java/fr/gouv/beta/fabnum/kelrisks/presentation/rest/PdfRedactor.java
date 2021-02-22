@@ -198,7 +198,7 @@ public class PdfRedactor {
         }
         
         if (avisDTO.getSiteIndustrielBasolRayonParcelleDTOs().size() + avisDTO.getSecteurInformationSolRayonParcelleDTOs().size() > 0) {
-            page.append("<p>Inventaires des sites pollués ou potentiellement pollués (Basol, SIS, SUP)</p>");
+            page.append("<p>Inventaires des sites pollués ou potentiellement pollués (Basol, SIS)</p>");
             lines++;
             
             tbody = addTableHtml(page);
@@ -416,8 +416,8 @@ public class PdfRedactor {
                                                                                                 "pu générer une pollution des sols (BASIAS).</p>" : "") +
                                (avisDTO.getSiteIndustrielBasolRayonParcelleDTOs().size() > 0 ? "<p>- " + avisDTO.getSiteIndustrielBasolRayonParcelleDTOs().size() + " site(s) pollué(s) (BASOL - " +
                                                                                                "terrain pollué appelant une action des pouvoirs publics à titre curatif ou préventif, SIS - terrain " +
-                                                                                               "placé en secteur d’information sur les sols, SUP - terrain pollué affecté d’une servitude d’utilité " +
-                                                                                               "publique)</p>" : "</p>") +
+                                                                                               "placé en secteur d’information sur les sols" +
+                                                                                               ")</p>" : "</p>") +
                                (!hasPollutionPrincipale(avisDTO) && numberOfParcelleMatches(avisDTO) > 0 ? "<p>" + numberOfParcelleMatches(avisDTO) + " site(s) présente(nt) une proximité forte avec" +
                                                                                                            " votre parcelle. Dans le cas où vous souhaiteriez en savoir davantage, il est recommandé " +
                                                                                                            "de faire réaliser une étude historique et, le cas échéant, des analyses de sols par un " +
@@ -552,7 +552,7 @@ public class PdfRedactor {
                       "POLLUTION DES SOLS",
                       localAppPath + "/pictogrammes_risque/ic_basias_bleu.png",
                       "<p>Votre parcelle ne figure pas dans l’inventaire :</p><p>- des installations classées soumises à enregistrement ou à autorisation</br>- des secteurs d’information sur les " +
-                      "sols</br>- des terrains pollués affectés d’une servitude d’utilité publique.</p>"
+                      "sols</p>"
                      );
         }
     
@@ -834,8 +834,6 @@ public class PdfRedactor {
                                                                                              "" + getLibelleInstallationsClassees(avisDTO) + "</p>" : "") +
                                (avisDTO.getSecteurInformationSolSurParcelleDTOs().size() > 0 ? "<p>- La parcelle est située en secteur d’information sur les sols : <br/>" +
                                                                                                "" + getLibelleSecteursInformation(avisDTO) + "</p>" : ""));
-//                               (false ? "- La parcelle est affectée d’une servitude d’utilité publique au titre des installations classées au titre du L 515-12 du " +
-//                                        "code de l’environnement." : ""));
         }
         
         if (avisDTO.getZonePlanExpositionBruit() != null) {

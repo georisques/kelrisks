@@ -135,7 +135,8 @@ public class ApiAvis extends AbstractBasicApi {
         
         if (shortUrlDTO == null) {
             shortUrlDTO = new ShortUrlDTO();
-            shortUrlDTO.setCode(RandomStringUtils.random(5, true, true));
+            // TinyURLs utilise 8 caracteres            
+            shortUrlDTO.setCode(RandomStringUtils.random(8, true, true));
             shortUrlDTO.setUrl(url);
         }
         

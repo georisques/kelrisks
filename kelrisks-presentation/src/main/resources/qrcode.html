@@ -3,7 +3,26 @@
     <head>
         <meta content="text/html; charset=utf-8"
               http-equiv="Content-Type"/>
-        <title>QrCode ERRIAL</title>
+        <title>QR Code ERRIAL - Évaluez simplement et rapidement les risques de votre bien</title>
+	    <meta content="#ffffff"
+	          name="theme-color">
+	    <link href="/images/favicons/apple-icon-180x180.png"
+	          rel="apple-touch-icon"
+	          sizes="180x180">
+	    <link href="/images/favicons/favicon-16x16.png"
+	          rel="icon"
+	          sizes="16x16"
+	          type="image/png">
+	    <link href="/images/favicons/favicon-32x32.png"
+	          rel="icon"
+	          sizes="32x32"
+	          type="image/png">
+	    <link href="/images/favicons/manifest.json"
+	          rel="manifest">
+	    <link color="#5bbad5"
+	          href="/images/favicons/safari-pinned-tab.svg"
+	          rel="mask-icon">  
+	                
         <style>
             html, body {
                 background-color : #FFFFFF;
@@ -127,7 +146,7 @@
     </head>
     <body>
         <header><a class="marianne"><img alt="République Française"
-                                         src="http://localhost:8080/mte.png"></a>
+                                         src="https://errial.georisques.gouv.fr/mte.png"></a>
             <div class="product_wrapper"><a class="product"><span>errial.georiques.gouv.fr</span></a>
                 <p class="tagline">Évaluez simplement et rapidement les risques de votre bien</p></div>
             <nav>
@@ -137,9 +156,41 @@
         <section class="section">
             <div class="container bordered"
                  id="qrcode_content">
-                <p class="title">Vérification de l'intégrité du pdf</p>
+                <p class="title">Vérification de l'intégrité du PDF</p>
                 <p class="subtitle">Données contenues dans le Code QR :</p>
             </div>
         </section>
+        
+	<script type="text/javascript">
+		var DOMAIN_MATOMO = '';
+		var ID_SITE_MATOMO = '';
+		// 12
+	    var MATOMO_API_KEYS = [
+	        {host: 'kelrisks.brgm-rec.fr', idSite: '272', domainMatomo: 'brgm-rec'},
+	        {host: 'errial.georisques.gouv.fr', idSite: '266', domainMatomo: 'brgm'},        
+	        {host: '*', idSite: '272', domainMatomo: 'brgm-rec'}
+	    ];
+	    
+	    for(var i=0; i<MATOMO_API_KEYS.length; i++){
+	         var k = MATOMO_API_KEYS[i];
+	         if ('*' === k.host || -1 !== document.domain.indexOf(k.host)) {
+				 ID_SITE_MATOMO = k.idSite;
+				 DOMAIN_MATOMO = k.domainMatomo;
+	             break;
+	         }    
+	    }	
+	
+		 var _paq = window._paq || [];
+		 /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+		 _paq.push(['trackPageView']);
+		 _paq.push(['enableLinkTracking']);
+		 (function() {
+		 var u="https://wwwstats."+DOMAIN_MATOMO+".fr/";
+		 _paq.push(['setTrackerUrl', u+'piwik.php']);
+		 _paq.push(['setSiteId', ID_SITE_MATOMO]);
+		 var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+		 g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+		 })();
+	</script>        
     </body>
 </html>

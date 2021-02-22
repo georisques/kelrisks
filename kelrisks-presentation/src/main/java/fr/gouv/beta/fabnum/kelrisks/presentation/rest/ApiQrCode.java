@@ -5,7 +5,6 @@ import fr.gouv.beta.fabnum.commun.metier.util.SecurityHelper;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.stream.Collectors;
@@ -27,6 +26,8 @@ public class ApiQrCode extends AbstractBasicApi {
     
     @Value("${kelrisks.app.security.passphrase}")
     String passphrase;
+    
+    private static final String ERROR_MESSAGE = "désolé une erreur est survenue";
     
     public ApiQrCode() {
         // Rien à faire
@@ -56,7 +57,7 @@ public class ApiQrCode extends AbstractBasicApi {
             
             return htmlDocument.outerHtml();
         }
-        catch (IOException e) {
+        catch (Exception e) {
            log.error("Fail to create HTML from QR Code", e);
         }
         
@@ -67,92 +68,80 @@ public class ApiQrCode extends AbstractBasicApi {
                "              http-equiv=\"Content-Type\"/>" +
                "    </head>\n" +
                "    <body>\n" +
-               "        <h1>Erreur lors de la vérification du Code QR</h1>\n" +
+               "        <h1>Désolé, il y a une erreur lors de la vérification du Code QR</h1>\n" +
                "    <body>\n" +
                "</html>";
     }
     
     private String getQrCodeContent(String[] values) {
+    	int nbValues = values.length;
+    	StringBuilder html = new StringBuilder("");
+        
+        html.append("      <p>" + "Nombre de BASIAS sur la parcelle : " + getValueSplit(0, 0, values, nbValues) + "</p>\n");
+        addUl(html, 0, values, nbValues);
+
+        html.append("      <p>" + "Nombre de BASIAS dans une parcelle contigüe : " + getValueSplit(1, 0, values, nbValues) + "</p>\n");
+        addUl(html, 1, values, nbValues);
+
+        html.append("      <p>" + "Nombre de Basol sur la parcelle : " + getValueSplit(2, 0, values, nbValues) + "</p>\n");
+        addUl(html, 2, values, nbValues);
+
+        html.append("      <p>" + "Nombre de Basol dans une parcelle contigüe : " + getValueSplit(3, 0, values, nbValues) + "</p>\n");
+        addUl(html, 3, values, nbValues);
+
+        html.append("      <p>" + "Nombre de Secteurs d'Information sur les Sols sur la parcelle : " + getValueSplit(4, 0, values, nbValues) + "</p>\n");
+        addUl(html, 4, values, nbValues);
+
+        html.append("      <p>" + "Nombre de Secteurs d'Information sur les Sols dans une parcelle contigüe : " + getValueSplit(5, 0, values, nbValues) + "</p>\n");
+        addUl(html, 5, values, nbValues);
+
+        html.append("      <p>" + "Nombre de Installations classées sur la parcelle : " + getValueSplit(6, 0, values, nbValues) + "</p>\n");
+        addUl(html, 6, values, nbValues);
+
+        html.append("      <p>" + "Nombre de Installations classées dans une parcelle contigüe : " + getValueSplit(7, 0, values, nbValues) + "</p>\n");
+        addUl(html, 7, values, nbValues);
+
+
+        html.append("      <p>" + "Niveau d'argile" + " : " + getValue(8, values, nbValues) + "</p>\n");
+        html.append("      <p>" + "Nombre de PPRs" + " : " + getValueSplit(9, 0, values, nbValues) + "</p>\n");
+        addUl(html, 9, values, nbValues);
+        
+        html.append("      <p>" + "Nombre de TRIs : " + getValue(10, values, nbValues) + "</p>\n");
+        html.append("      <p>" + "Nombre de AZIs : " + getValue(11, values, nbValues) + "</p>\n");
+        html.append("      <p>" + "Nombre de canalisations : " + getValue(12, values, nbValues) + "</p>\n");
+        html.append("      <p>" + "Nombre d'installations nucléaires : " +  getValueSplit(13, 0, values, nbValues) + "</p>\n");
+        addUl(html, 13, values, nbValues);
+        
+        html.append("      <p>" + "Zonage exposition au bruit : " + getValue(14, values, nbValues) + "</p>\n");
+        
+        return html.toString();
+    }
     
-        String html = "";
+    private void addUl(StringBuilder html, int indexVal, String[] values, int nbValues) {
+    	if(indexVal < nbValues && values[indexVal].split("==").length > 1) {
+           html.append("      <ul>" + Stream.of(getValueSplit(indexVal, 1, values, nbValues).split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n");
+    	}
+    }
     
-        html += "      <p>" + "Nombre de Basias sur la parcelle" + " : " + values[0].split("==")[0] + "</p>\n";
-        if (values[0].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[0].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Basias dans un rayon de 500m" + " : " + values[1].split("==")[0] + "</p>\n";
-        //        if (values[1].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[1].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Nombre de Basias dans une parcelle contigüe" + " : " + values[2].split("==")[0] + "</p>\n";
-        if (values[2].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[2].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Basias non géoréférencés dans la commune" + " : " + values[3].split("==")[0] + "</p>\n";
-        //        if (values[3].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[3].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Nombre de Basol sur la parcelle" + " : " + values[4].split("==")[0] + "</p>\n";
-        if (values[4].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[4].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Basol dans un rayon de 500m" + " : " + values[5].split("==")[0] + "</p>\n";
-        //        if (values[5].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[5].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Nombre de Basol dans une parcelle contigüe" + " : " + values[6].split("==")[0] + "</p>\n";
-        if (values[6].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[6].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Basol non géoréférencés dans la commune" + " : " + values[7].split("==")[0] + "</p>\n";
-        //        if (values[7].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[7].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Nombre de Secteurs d'Information Sol sur la parcelle" + " : " + values[8].split("==")[0] + "</p>\n";
-        if (values[8].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[8].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Secteurs d'Information Sol dans un rayon de 500m" + " : " + values[9].split("==")[0] + "</p>\n";
-        //        if (values[9].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[9].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Nombre de Secteurs d'Information Sol dans une parcelle contigüe" + " : " + values[10].split("==")[0] + "</p>\n";
-        if (values[10].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[10].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Secteurs d'Information Sol non géoréférencés dans la commune" + " : " + values[11].split("==")[0] + "</p>\n";
-        //        if (values[11].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[11].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Nombre de Installations classées sur la parcelle" + " : " + values[12].split("==")[0] + "</p>\n";
-        if (values[12].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[12].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Installations classées dans un rayon de 500m" + " : " + values[13].split("==")[0] + "</p>\n";
-        //        if (values[13].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[13].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Nombre de Installations classées dans une parcelle contigüe" + " : " + values[14].split("==")[0] + "</p>\n";
-        if (values[14].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[14].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        //        html += "      <p>" + "Nombre de Installations classées non géoréférencés dans la commune" + " : " + values[15].split("==")[0] + "</p>\n";
-        //        if (values[15].split("==").length > 1) {
-        //            html += "      <ul>" + Stream.of(values[15].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        //        }
-        html += "      <p>" + "Niveau d'argile" + " : " + values[16] + "</p>\n";
-        html += "      <p>" + "Nombre de Nombre de PPRs" + " : " + values[17].split("==")[0] + "</p>\n";
-        if (values[17].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[17].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        html += "      <p>" + "Nombre de TRIs" + " : " + values[18] + "</p>\n";
-        html += "      <p>" + "Nombre de AZIs" + " : " + values[19] + "</p>\n";
-        html += "      <p>" + "Nombre de canalisations" + " : " + values[20] + "</p>\n";
-        html += "      <p>" + "Nombre d'installations nucléaires" + " : " + values[21].split("==")[0] + "</p>\n";
-        if (values[21].split("==").length > 1) {
-            html += "      <ul>" + Stream.of(values[21].split("==")[1].split(",")).map(s -> "         <li>" + s + "</li>\n").collect(Collectors.joining()) + "</ul>\n";
-        }
-        html += "      <p>" + "Zonage exposition au bruit" + " : " + values[22] + "</p>\n";
-        return html;
+    private String getValue(int indexVal, String[] values, int nbValues) {
+    	if(indexVal < nbValues) {
+    		String val = values[indexVal];
+    		if (val == null || val.equals("null")) {
+    			val = "";
+        	}
+    		return val;
+    	}
+    	return ERROR_MESSAGE;
+    }
+    
+    private String getValueSplit(int indexVal, int indexSplit, String[] values, int nbValues) {
+    	if(indexVal < nbValues) {
+        	String value = values[indexVal].split("==")[indexSplit];
+        	if (value == null || value.equals("null")) {
+        		value = ERROR_MESSAGE;
+        	}
+        	return value;
+    	}
+    	return ERROR_MESSAGE;
     }
 }

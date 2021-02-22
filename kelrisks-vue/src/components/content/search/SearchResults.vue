@@ -361,7 +361,7 @@
                     :detail="'<p>Dans un rayon de 500 m autour de votre parcelle, sont identifiés :</br>'+
                               (avis.installationClasseeRayonParcelle.numberOf > 0 ? '- '+ avis.installationClasseeRayonParcelle.numberOf +' installation(s) classée(s) pour la protection de l\'environnement (ICPE) soumises à autorisation ou à enregistrement, installations qui peuvent présenter des dangers ou inconvénients du fait de leur activité.</br>' : '') +
                               (avis.basiasRayonParcelle.numberOf > 0 ? '- '+ avis.basiasRayonParcelle.numberOf +' site(s) référencé(s) dans l\'inventaire BASIAS des sites ayant accueilli par le passé une activité industrielle ou une activité de service qui a pu générer une pollution des sols.</br>' : '') +
-                              (avis.basolRayonParcelle.numberOf > 0 ? '- '+ avis.basolRayonParcelle.numberOf +' site(s) pollué(s) ou potentiellement pollués (Basol - terrain pollué ou potentiellement pollué appelant une action des pouvoirs publics à titre curatif ou préventif, SIS - terrain placé en secteur d\'information sur les sols, SUP - terrain pollué affecté d\'une serviture d\'utilité publique)</br></p>' : '</p>') +
+                              (avis.basolRayonParcelle.numberOf > 0 ? '- '+ avis.basolRayonParcelle.numberOf +' site(s) pollué(s) ou potentiellement pollués (Basol - terrain pollué ou potentiellement pollué appelant une action des pouvoirs publics à titre curatif ou préventif, SIS - terrain placé en secteur d\'information sur les sols</br></p>' : '</p>') +
                               (!hasPollutionPrincipale && numberOfParcelleMatches > 0 ? '<p>' + numberOfParcelleMatches + ' site(s) présente(nt) une proximité forte avec votre parcelle. Dans le cas où vous souhaiteriez en savoir davantage, il est recommandé de faire réaliser une étude historique et, le cas échéant, des analyses de sols par un bureau d’étude spécialisé dans le domaine des sols pollués.</p>' : '') +
                               (hasPollutionCentroidCommune ? '<p>Les données disponibles mentionnent parfois la présence d\'anciennes activités qui sont localisées par défaut sur le centre géographique de la commune lorsqu\'une localisation précise n\'est pas disponible. La présente analyse n\'en tient donc pas compte.</p>' : '')"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_basias_bleu.png'"
@@ -458,8 +458,7 @@
                     v-if="!hasPPRT"/>
 
             <risque :description="'<p>Votre parcelle n\'est pas située sur un secteur d\'information sur les sols.</p>' +
-                                      '<p>Aucune installation classée pour la protection de l\'environnement soumise à autorisation ou enregistrement sur votre parcelle ne figure dans la base de données des installations classées.</p>' +
-                                      '<p>Aucune servitude d\'utilité publique (SUP) relative à la pollution des sols sur votre parcelle ne figure dans le Géoportail de l\'Urbanisme.</p>'"
+                                      '<p>Aucune installation classée pour la protection de l\'environnement soumise à autorisation ou enregistrement sur votre parcelle ne figure dans la base de données des installations classées.</p>'"
                     :title="'Pollution des sols'"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_basias_bleu.png'"
                     v-if="!hasPollutionPrincipale"/>
