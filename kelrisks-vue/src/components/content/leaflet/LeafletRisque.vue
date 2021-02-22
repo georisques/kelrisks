@@ -5,7 +5,8 @@
                :id="'leafletMap_' + reference"
                :ref="'leafletMap_' + reference"
                :options="{attributionControl: false}"
-               :zoom="zoom">
+               >
+            <l-control-attribution position="bottomright" prefix="<a href='https://www.ign.fr/' target='_blank'>IGN</a> | <a href='https://cadastre.data.gouv.fr/datasets/cadastre-etalab' target='_blank'>Etalab</a>"></l-control-attribution>
             <l-tile-layer :url="url"/>
             <l-geo-json :geojson="getData(parcelle)"
                         :options="featureOptions"
@@ -15,6 +16,7 @@
             <l-geo-json :geojson="getData(data)"
                         :ref="'lGeoJson_' + reference"
                         :options="featureOptions"
+                        :attribution="attribution"
                         :options-style="styleFunction('#455674')"
                         v-if="typeof data === 'string' "/>
 
@@ -26,6 +28,7 @@
                         v-else:
                         :key="json.color + '_' + index"
                         :options="featureOptions(json.color)"
+                        :attribution="attribution"
                         :options-style="styleFunction(json.color, json.opacity)"
                         v-for="(json, index) in data"/>
         </l-map>
@@ -34,7 +37,7 @@
 
 <script>
 import {divIcon, marker} from "leaflet";
-import {LGeoJson, LMap, LTileLayer} from 'vue2-leaflet';
+import {LGeoJson, LMap, LTileLayer, LControlAttribution} from 'vue2-leaflet';
 import mixinLeaflet from "./leaflet_common";
 
 export default {
@@ -43,7 +46,8 @@ export default {
     components: {
         LMap,
         LTileLayer,
-        LGeoJson
+        LGeoJson,
+        LControlAttribution
     },
     props: {
         parcelle: {
@@ -126,12 +130,14 @@ export default {
         },
         onEachFeatureFunction () {
             return (feature, layer) => {
+                // TODO a supprimer ne semble plus utiliser
                 layer.bindTooltip(
                     () => {
                         let divs = ''
                         for (let property in feature.properties) {
                             let value = feature.properties[property]
                             let label = "";
+
                             if (property.startsWith("'")) {
                                 label = property.substring(1, property.length - 1)
                             } else {
@@ -203,9 +209,10 @@ export default {
             this.centerMap()
 
             // FIXME time out pour eviter de charger la couche WMS a chaque fois que la carte chanque emprise a cause du centerMap()
+            // 2000 ce n'est pas assez
             setTimeout(() => {
                 this.addWmsLayer(ref)
-            }, 2000);    
+            }, 2500);    
             // if (!this.isCenterDefault()) this.injectCustomZoomControl('leafletMap_' + this.reference)
         })
         window.addEventListener('resize', this.centerMap)

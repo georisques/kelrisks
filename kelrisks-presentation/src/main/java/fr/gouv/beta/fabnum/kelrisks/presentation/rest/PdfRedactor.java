@@ -234,7 +234,7 @@ public class PdfRedactor {
         
         tbody.append("<tr class=\"" + (tbody.select("tr").size() % 2 == 0 ? "" : "even") + "\">" +
                      "<td>" + nom + "</td>" +
-                     "<td>" + url + "</td>" +
+                     "<td><a href='"+url+"'>" + url + "</a></td>" +
                      "</tr>\n");
     }
     
@@ -382,19 +382,17 @@ public class PdfRedactor {
                                "des dégâts pouvant être importants. Le zonage argile identifie les zones exposées à ce phénomène de retrait-gonflement selon leur degré d’exposition.</p>" +
                                (avisDTO.getNiveauArgile() == 3 ? "<p>Exposition forte : La probabilité de survenue d’un sinistre est élevée et l’intensité des phénomènes attendus est forte. Les " +
                                                                  "constructions, notamment les maisons individuelles, doivent être réalisées en suivant des prescriptions constructives ad hoc. Pour " +
-                                                                 "plus de détails :</br>https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3"
+                                                                 "plus de détails :</br><a href='https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3'>https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3</a>"
                                                                : "") +
                                (avisDTO.getNiveauArgile() == 2 ?
                                 "<p>Exposition moyenne : La probabilité de survenue d’un sinistre est moyenne, l’intensité attendue étant modérée.  Les constructions, notamment les maisons " +
-                                "individuelles, doivent être réalisées en suivant des prescriptions constructives ad hoc. Pour plus de détails :</br>https://www.cohesion-territoires.gouv" +
-                                ".fr/sols-argileux-secheresse-et-construction#e3"
+                                "individuelles, doivent être réalisées en suivant des prescriptions constructives ad hoc. Pour plus de détails :</br><a href='https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3'>https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3</a>"
                                                                : "") +
                                (avisDTO.getNiveauArgile() == 1 ? "<p>Exposition faible : La survenance de sinistres est possible en cas de sécheresse importante, mais ces désordres ne toucheront " +
                                                                  "qu’une faible proportion des bâtiments (en priorité ceux qui présentent des défauts de construction ou un contexte local " +
                                                                  "défavorable, avec par exemple des arbres proches ou une hétérogénéité du sous-sol). Il est conseillé, notamment pour la " +
                                                                  "construction d’une maison individuelle, de réaliser une étude de sols pour déterminer si des prescriptions constructives " +
-                                                                 "spécifiques sont nécessaires. Pour plus de détails :</br>https://www.cohesion-territoires.gouv" +
-                                                                 ".fr/sols-argileux-secheresse-et-construction#e3" : "") +
+                                                                 "spécifiques sont nécessaires. Pour plus de détails :</br><a href='https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3'>https://www.cohesion-territoires.gouv.fr/sols-argileux-secheresse-et-construction#e3</a>" : "") +
                                (avisDTO.getNiveauArgile() == 0 ? "<p>Exposition nulle : aucune présence de sols argileux n’a été identifiée selon les cartes géologiques actuelles. Toutefois il peut" +
                                                                  " y avoir des poches ponctuelles de sols argileux." : ""),
                                new Legend("#FFD332", "1 : Exposition faible"),
@@ -634,19 +632,19 @@ public class PdfRedactor {
             if (hasSismiciteMoyenne(avisDTO)) {
                 page.append("<p>Pour certains bâtiments de taille importante ou sensibles, des dispositions spécifiques à mettre en oeuvre s'appliquent lors de la construction. Un guide interactif " +
                             "est proposé sur le site Plan Séisme pour identifier précisément les dispositions à prendre en compte selon votre localisation, votre type d'habitat ou votre" +
-                            " projet. Il est consultable à l'adresse suivante : http://www.planseisme.fr/-Didacticiel-.html</p>");
-                page.append("<p>Pour connaitre les consignes à appliquer en cas de séisme, vous pouvez consulter le site : : http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html</p>");
+                            " projet. Il est consultable à l'adresse suivante : <a href='http://www.planseisme.fr/-Didacticiel-.html'>http://www.planseisme.fr/-Didacticiel-.html</a></p>");
+                page.append("<p>Pour connaitre les consignes à appliquer en cas de séisme, vous pouvez consulter le site : <a href='http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html'>http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html</a></p>");
             }
         
             if (hasSismiciteHaute(avisDTO) || hasSismiciteTresHaute(avisDTO)) {
                 page.append("<p>Pour le bâti neuf et pour certains travaux lourds sur le bâti existant, en fonction de la zone de sismicité et du type de construction, des dispositions spécifiques " +
                             "à mettre en oeuvre s'appliquent lors de la construction</p>");
                 page.append("<p>Un guide interactif est proposé pour identifier précisément les dispositions à prendre en compte selon votre localisation, votre type d'habitat ou votre projet. Il " +
-                            "est consultable à l'adresse suivante : http://www.planseisme.fr/-Didacticiel-.html</p>");
+                            "est consultable à l'adresse suivante : <a href='http://www.planseisme.fr/-Didacticiel-.html'>http://www.planseisme.fr/-Didacticiel-.html</a></p>");
             }
         
             if (hasSismiciteHaute(avisDTO)) {
-                page.append("<p>Pour connaitre les consignes à appliquer en cas de séisme , vous pouvez consulter le site : http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html</p>");
+                page.append("<p>Pour connaitre les consignes à appliquer en cas de séisme , vous pouvez consulter le site : <a href='http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html'>http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html</a></p>");
             }
         
             if (hasSismiciteTresHaute(avisDTO)) {
@@ -659,7 +657,7 @@ public class PdfRedactor {
                             "- en voiture : s’arrêter et ne pas descendre avant la fin des secousses.</p>");
                 page.append("<p>Se protéger la tête avec les bras.</p>");
                 page.append("<p>Ne pas allumer de flamme.</p>");
-                page.append("<p>Pour plus de détails, vous pouvez consulter le site : http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html</p>");
+                page.append("<p>Pour plus de détails, vous pouvez consulter le site : <a href='http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html'>http://www.planseisme.fr/Que-faire-en-cas-de-seisme.html</a></p>");
             }
         }
     

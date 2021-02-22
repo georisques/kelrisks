@@ -75,7 +75,8 @@ export default {
             type: Array,
             default: () => []
         },
-        idPpr: {default: () => null}
+        idPpr: {default: () => null},
+        attribution: {default: () => null}
     },
     methods: {
         crippleMap (ref) {
@@ -159,13 +160,13 @@ export default {
             zoomInControl.click((e) => {
 
                 e.stopPropagation()
-                this.zoomIn(map);
+                this.zoomIn(map)
             });
 
             zoomOutControl.click((e) => {
 
                 e.stopPropagation()
-                this.zoomOut(map);
+                this.zoomOut(map)
             });
         },
         parseJSON (json) {
@@ -318,12 +319,14 @@ export default {
 
                 let wmsServerUrl = window.DOMAIN_MATOMO === 'brgm-rec' ? this.wmsServers['recette'] : this.wmsServers['prod']
                 console.log("wmsServerUrl",wmsServerUrl)
-
+                console.log("attribution 3", this.attribution)
+                
                 let paramsWms =  {
                     layers: this.wmsLayer,
                     format: 'image/png',
                     transparent: true,
-                    opacity: 0.8
+                    opacity: 0.8,
+                    attribution: this.attribution
                 }
 
                 console.log("bboxRisque", this.wmsLayer, this.bboxRisque)

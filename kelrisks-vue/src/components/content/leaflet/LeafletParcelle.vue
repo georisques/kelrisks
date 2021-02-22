@@ -6,6 +6,7 @@
                ref="leafletParcelles">
             <l-tile-layer :url="url"/>
             <l-control-zoom zoomInTitle="Vue rapprochée" zoomOutTitle="Vue éloignée" position="topleft"></l-control-zoom>
+            <l-control-attribution position="bottomright" prefix="<a href='https://www.ign.fr/' target='_blank'>IGN</a> | <a href='https://cadastre.data.gouv.fr/datasets/cadastre-etalab' target='_blank'>Etalab</a>"></l-control-attribution>
             <l-geo-json :geojson="parseJSONMap(data.parcelles)"
                         :options="parcellesOptions"
                         :options-style="parcellesStyleFunction"
@@ -19,7 +20,7 @@
 </template>
 
 <script>
-import {LGeoJson, LMap, LMarker, LTileLayer, LControlZoom} from 'vue2-leaflet';
+import {LGeoJson, LMap, LMarker, LTileLayer, LControlZoom, LControlAttribution} from 'vue2-leaflet';
 import fetchWithError from "../../../script/fetchWithError";
 import {icon} from "leaflet";
 import mixinLeaflet from "./leaflet_common";
@@ -32,7 +33,8 @@ export default {
         LTileLayer,
         LMarker,
         LGeoJson,
-        LControlZoom
+        LControlZoom,
+        LControlAttribution
     },
     props: {
         center: {
@@ -133,8 +135,10 @@ export default {
                 layer.bindTooltip(
                     () => {
                         let divs = ''
-                        divs = divs.concat('<div>', 'INSEE', ' : ', feature.properties['commune'], '</div>',
-                            '<div>', 'Code', ' : ', feature.properties['code'], '</div>')
+                        divs = divs.concat(
+                            '<div>', 'Code INSEE', ' : ', feature.properties['commune'], '</div>',
+                            '<div>', 'Code parcelle', ' : ', feature.properties['code'], '</div>'
+                            )
                         return divs
                     },
                     {permanent: false, sticky: true}

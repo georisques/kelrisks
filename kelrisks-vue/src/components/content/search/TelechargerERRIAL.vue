@@ -49,9 +49,11 @@
                                  :max-zoom-center="leaflet.center"
                                  :min-zoom="14"
                                  :parcelle="leaflet.data.parcelles"
+                                 :png-name="currentPngName"
                                  @png="pngGenerated"
                                  :wms-layer="currentWmsLayer"
                                  :wms-servers="currentWmsServers"
+                                 :attribution="currentAttribution"
                                  :codes-communes="this.avis.codesCommunes"
                                  :bbox-risque="this.avis.bboxParcelles"
                                  :id-ppr="currentIdPpr"
@@ -115,6 +117,7 @@ export default {
         currentWmsLayer: null,
         currentWmsServers: null,
         currentIdPpr: null,
+        currentAttribution: null,
         pngList: [],
     }),
     methods: {
@@ -141,7 +144,7 @@ export default {
                     }],
                     plan.alea.familleAlea.code,// FIXME peut etre lie au bug #82
                     (!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.layer : conf.config.couchesRisques.ppr_gpu.layer),
-                    (!plan.existsInGeorisque && !plan.existsInGpu) ? null  : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.serveurs : conf.config.couchesRisques.ppr_gpu.serveurs),                    
+                    (!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.serveurs : conf.config.couchesRisques.ppr_gpu.serveurs),                    
                     (!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? plan.idGaspar : plan.idAssietteErrial)])
             }
 
@@ -189,7 +192,7 @@ export default {
                 "POLLUTION_NON_REG"])
 
             if (this.hasArgile) this.dataList.push([
-                typeof this.avis.plansExpositionBruit.map === 'function' ?
+                typeof this.avis.lentillesArgile.map === 'function' ?
                     [{data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 1).map(x => x.multiPolygon), color: '#FFE340', opacity: 0},
                         {data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 2).map(x => x.multiPolygon), color: '#FF9020', opacity: 0},
                         {data: this.avis.lentillesArgile.filter(x => x.niveauAlea === 3).map(x => x.multiPolygon), color: '#841520', opacity: 0}] :
@@ -197,7 +200,7 @@ export default {
                 "ARGILE", conf.config.couchesRisques.argile.layer, conf.config.couchesRisques.argile.serveurs])
 
             if (this.hasCanalisations) this.dataList.push([
-                typeof this.avis.plansExpositionBruit.map === 'function' ?
+                typeof this.avis.canalisations.map === 'function' ?
                     [{data: this.avis.canalisations, color: '#2A4999', opacity: 0}] :
                     undefined,
                 "CANALISATIONS", conf.config.couchesRisques.canalisations.layer, conf.config.couchesRisques.canalisations.serveurs])
@@ -249,6 +252,14 @@ export default {
                         this.currentWmsServers = null
                         this.currentIdPpr = null
                     }
+
+                    // add attribution
+                    if(this.currentIdPpr != null){
+                        this.currentAttribution = conf.config.attributions.PPR
+                    } else if (this.currentPngName != 'carte-parcelle'){
+                        this.currentAttribution = conf.config.attributions[this.currentPngName]
+                    }
+
                     return
                 }
             }
@@ -257,6 +268,7 @@ export default {
             this.currentWmsLayer = null
             this.currentWmsServers = null
             this.currentIdPpr = null
+            this.currentAttribution = null
             this.debounceFetchPdf()
         },
         fetchPdf () {

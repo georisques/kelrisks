@@ -79,6 +79,7 @@
                     :leaflet-wms-servers="(!plan.existsInGeorisque && !plan.existsInGpu) ? null  : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.serveurs : conf.config.couchesRisques.ppr_gpu.serveurs)"
                     :leaflet-wms-layer="(!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? conf.config.couchesRisques.ppr_georisques.layer : conf.config.couchesRisques.ppr_gpu.layer)"
                     :leaflet-id-ppr="(!plan.existsInGeorisque && !plan.existsInGpu) ? null : (plan.existsInGeorisque ? plan.idGaspar : plan.idAssietteErrial)"
+                    :leaflet-attribution="conf.config.attributions.PPR"
                     :leaflet-data="[{ data : plan.assiettes,
                                       color : '#840505', opacity: 0}]"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/'+ getLogoRisque(plan.alea.familleAlea.code) +'.png'"
@@ -123,6 +124,7 @@
                     :leaflet-wms-servers="conf.config.couchesRisques.sismicite.serveurs"
                     :leaflet-wms-layer="conf.config.couchesRisques.sismicite.layer"
                     :leaflet-codes-communes="avis.codesCommunes"
+                    :leaflet-attribution="conf.config.attributions.SISMICITE"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_seisme_bleu.png'"
                     :title="'Sismicité'"
                     :parcelle="leaflet.data.parcelles"
@@ -148,6 +150,7 @@
                     :leaflet-min-zoom="14"
                     :leaflet-wms-servers="conf.config.couchesRisques.radon.serveurs"
                     :leaflet-wms-layer="conf.config.couchesRisques.radon.layer"
+                    :leaflet-attribution="conf.config.attributions.RADON"
                     :leaflet-codes-communes="avis.codesCommunes"
                     :legend-blocks="[
                         ['#FFD332', '1 : potentiel radon faible'],
@@ -198,6 +201,7 @@
                     :level="avis.zonePlanExpositionBruit"
                     :leaflet-wms-servers="conf.config.couchesRisques.peb.serveurs"
                     :leaflet-wms-layer="conf.config.couchesRisques.peb.layer"
+                    :leaflet-attribution="conf.config.attributions.PEB"
                     :title="'Bruit'"
                     v-if="hasPEB"/>
 
@@ -345,6 +349,7 @@
                                     undefined"
                     :leaflet-wms-servers="conf.config.couchesRisques.radon.serveurs"
                     :leaflet-wms-layer="conf.config.couchesRisques.radon.layer"
+                    :leaflet-attribution="conf.config.attributions.RADON"                    
                     :leaflet-codes-communes="avis.codesCommunes"                                    
                     :leaflet-min-zoom="14"
                     :legend-blocks="[
@@ -367,6 +372,7 @@
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_basias_bleu.png'"
                     :title="'Pollution des sols (500 m)'"
                     :parcelle="leaflet.data.parcelles"
+                    :leaflet-attribution="conf.config.attributions.POLLUTION_NON_REG"
                     :max-zoom-center="leaflet.center"
                     :leaflet-data="[{ data : avis.installationClasseeRayonParcelle.liste.map(x => x.ewkt),
                                       color : '#8E0800'},
@@ -415,6 +421,7 @@
                     :level-max="'3'"
                     :leaflet-wms-servers="conf.config.couchesRisques.argile.serveurs"
                     :leaflet-wms-layer="conf.config.couchesRisques.argile.layer"
+                    :leaflet-attribution="conf.config.attributions.ARGILE"
                     :leaflet-bbox-risque="avis.bboxParcelles"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_terre_bleu.png'"
                     :title="'Argile'"
@@ -428,6 +435,7 @@
                                       color : '#2A4999', opacity: 0}]"
                     :leaflet-wms-servers="conf.config.couchesRisques.canalisations.serveurs"
                     :leaflet-wms-layer="conf.config.couchesRisques.canalisations.layer"
+                    :leaflet-attribution="conf.config.attributions.CANALISATIONS"
                     :logo-u-r-l="env.backPath + '/pictogrammes_risque/ic_reseaux_canalisation_bleu.png'"
                     :title="'Canalisations transport de matières dangereuses'"
                     v-if="hasCanalisations"/>

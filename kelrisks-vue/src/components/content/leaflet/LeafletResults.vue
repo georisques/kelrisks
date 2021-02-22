@@ -5,6 +5,7 @@
                :options="{attributionControl: false}"
                :id="'leafletMap_' + reference"
                :ref="'leafletMap_' + reference">
+            <l-control-attribution position="bottomright" prefix="<a href='https://www.ign.fr/' target='_blank'>IGN</a> | <a href='https://cadastre.data.gouv.fr/datasets/cadastre-etalab' target='_blank'>Etalab</a>"></l-control-attribution>
             <l-tile-layer :url="url"/>
             <l-geo-json :geojson="parseJSONMap(data.parcelles)"
                         :options="parcelleOptions"
@@ -19,7 +20,7 @@
 
 <script>
 import {icon, marker} from "leaflet";
-import {LGeoJson, LMap, LTileLayer} from 'vue2-leaflet';
+import {LGeoJson, LMap, LTileLayer, LControlAttribution} from 'vue2-leaflet';
 import mixinLeaflet from "./leaflet_common";
 
 export default {
@@ -28,7 +29,8 @@ export default {
     components: {
         LMap,
         LTileLayer,
-        LGeoJson
+        LGeoJson,
+        LControlAttribution
     },
     props: {
         data: {
@@ -79,21 +81,10 @@ export default {
                 layer.bindTooltip(
                     () => {
                         let divs = ''
-                        for (let property in feature.properties) {
-                            let value = feature.properties[property]
-                            let label = "";
-                            if (property.startsWith("'")) {
-                                label = property.substring(1, property.length - 1)
-                            } else {
-                                label = property.replace(/([A-Z])/gm, function (v) {
-                                    return ' ' + v.toLowerCase()
-                                }).replace(/(^.)/gm, function (v) {
-                                    return v.toUpperCase()
-                                })
-                            }
-                            divs = divs.concat('<div>', label, ' : ', value, '</div>')
-                        }
-
+                        divs = divs.concat(
+                            '<div>', 'Code INSEE', ' : ', feature.properties['codeINSEE'], '</div>',
+                            '<div>', 'Code parcelle', ' : ', feature.properties['parcelle'], '</div>'
+                        )
                         return divs
                     },
                     {permanent: false, sticky: true}

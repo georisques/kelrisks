@@ -56,6 +56,7 @@
                      :codes-communes="leafletCodesCommunes"
                      :bbox-risque="leafletBboxRisque"
                      :id-ppr="leafletIdPpr"
+                     :attribution="leafletAttribution"
                      />
         </div>
     </div>
@@ -139,7 +140,11 @@ export default {
       leafletIdPpr: {
           type: String,
           default: null
-      },      
+      },
+      leafletAttribution: {
+          type: String,
+          default: null
+      },    
     },
     methods: {},
     computed: {

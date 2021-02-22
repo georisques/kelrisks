@@ -102,14 +102,14 @@
         <header role="navigation">
 
             <a class="marianne"
-               href="index.html">
+               href="https://www.ecologie.gouv.fr/" target="_blank" rel="noopener" title="Se rendre sur le site du Ministère de la Transition écologique (Nouvelle fenêtre)">
                 <img :src="env.backPath + '/mte.png'"
                      alt="République Française"/>
             </a>
 
             <div class="product_wrapper">
                 <a class="product"
-                   href="index.html">
+                   href="/">
                     <span class="">errial.georisques.gouv.fr</span>
                 </a>
                 <p class="tagline">Évaluez simplement et rapidement les risques de votre bien</p>
@@ -173,7 +173,7 @@
 
         <footer>
             <a class="marianne"
-               href="index.html">
+               href="https://www.ecologie.gouv.fr/" target="_blank" rel="noopener" title="Se rendre sur le site du Ministère de la Transition écologique (Nouvelle fenêtre)">
                 <img :src="env.backPath + '/mte.png'"
                      alt="République Française"/>
             </a>
@@ -191,15 +191,12 @@
                 <a href="https://www.georisques.gouv.fr/cgu"
                    rel="noopener"
                    target="_blank">CGU</a>
+                <a href="https://www.georisques.gouv.fr/mentions-legales"
+                   rel="noopener"
+                   target="_blank">Mentions légales</a>
                 <a href="https://www.georisques.gouv.fr/donnees-personnelles"
                    rel="noopener"
                    target="_blank">Données personnelles</a>
-                <!-- Les stats bugs (matomo) -->
-                <!-- <a @click="showStats()">Stats</a> -->
-                <!--<a href="/swagger-ui.html"
-                   rel="noopener"
-
-                   target="_blank">API</a>-->
             </div>
 
             <div class="version">{{ env.presentationVersion }}</div>
