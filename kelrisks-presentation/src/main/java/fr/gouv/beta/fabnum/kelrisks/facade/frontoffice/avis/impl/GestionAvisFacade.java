@@ -566,14 +566,15 @@ public class GestionAvisFacade extends AbstractFacade implements IGestionAvisFac
         if (!georisquePaginatedRadon.getData().isEmpty()) {
         	// il peut y avoir plusieurs fois la meme commune avec des valeur de radon differente, il faut prendre la plus forte
             // cf https://gitlab.brgm.fr/brgm/georisques/georisques-ministere/-/issues/1142
-        	avisDTO.getSummary().getCommune().setClassePotentielRadon(georisquePaginatedRadon.getData().stream()
+        	georisquePaginatedRadon.getData().stream()
+        			.filter(zs -> zs.getCode_insee().equals(commune.getCodeINSEE()))
                     .sorted(Comparator.comparing(Radon::getClassePotentielAsInt)
-                            .reversed()).findFirst().get().getClasse_potentiel());
+                            .reversed()).findFirst().ifPresent(c -> avisDTO.getSummary().getCommune().setClassePotentielRadon(c.getClasse_potentiel()));
         	            
-            avisDTO.getSummary().getCommune().getCommunesLimitrophes()
-                    .forEach(communeDTO -> communeDTO.setClassePotentielRadon(georisquePaginatedRadon.getData().stream()
-                                                                                      .filter(zs -> zs.getCode_insee().equals(commune.getCodeINSEE()))
-                                                                                      .findFirst().get().getClasse_potentiel()));
+			avisDTO.getSummary().getCommune().getCommunesLimitrophes()
+					.forEach(communeDTO -> georisquePaginatedRadon.getData().stream()
+							.filter(zs -> zs.getCode_insee().equals(communeDTO.getCodeINSEE())).findFirst()
+							.ifPresent(c -> communeDTO.setClassePotentielRadon(c.getClasse_potentiel())));
         }
     }
     
