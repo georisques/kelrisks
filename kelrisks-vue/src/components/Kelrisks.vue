@@ -197,9 +197,36 @@
                 <a href="https://www.georisques.gouv.fr/donnees-personnelles"
                    rel="noopener"
                    target="_blank">Données personnelles</a>
+                <button class="removeCookie" title="Supprimer le choix de consentement des cookies du site"
+                   @click="removeCookie">Gérer les cookies</button>
             </div>
 
             <div class="version">{{ env.presentationVersion }}</div>
+
+            <vue-cookie-accept-decline
+                :ref="'cookieConsent'"
+                :elementId="'cookieConsent'"
+                :debug="false"
+                :position="'bottom'"
+                :type="'bar'"
+                :disableDecline="false"
+                :transitionName="'slideFromBottom'"
+                :showPostponeButton="false"
+                @status="cookieStatus"
+                @clicked-accept="cookieClickedAccept"
+                @removed-cookie="cookieRemovedCookie"
+                >  
+                <div slot="message">
+                    <div>Le site errial.georisques.gouv.fr utilise des cookies à des fins statistiques totalement anonymes. Vous avez le choix de les accepter ou de les refuser.</div>
+                    <div style="margin-top=5px;font-weight: initial;">Vous pouvez changer d'avis à tout moment en cliquant sur "Gérer les cookies" en bas de la page.</div>
+                </div>
+                <div slot="declineContent">
+                    Je refuse
+                </div>
+                <div slot="acceptContent">
+                    J'accepte
+                </div>
+            </vue-cookie-accept-decline>
 
         </footer>
 
@@ -266,6 +293,9 @@ export default {
     methods: {
         updateflow (value) {
             this.flow.index += value
+            if (value === -1 && this.flow.index === 2) {
+                window.dispatchEvent(new Event('resize'))
+            }
         },
         errial (value) {
             this.avis.errial = value
@@ -291,6 +321,33 @@ export default {
             if (index === 1) {
                 window.location.href = this.env.frontPath;
             }
+        },
+        cookieStatus (status) {
+            if (status == 'accept') {
+                var axel = Math.random() + "";
+                var a = axel * 10000000000000;
+                var scr = document.getElementById('tracker');
+                scr.setAttribute('src', 'https://3689183.fls.doubleclick.net/activityi;src=3689183;type=acqur0;cat=immo;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ord=1;num=' + a + '?');
+                var noscript = document.getElementsByTagName("noscript")[0];
+                noscript.innerHTML = '<iframe src="https://3689183.fls.doubleclick.net/activityi;src=3689183;type=acqur0;cat=immo;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ord=1;num=1?" width="1" height="1" frameborder="0" style="display:none"></iframe>';
+            }
+        },
+        cookieClickedAccept () {
+            var axel = Math.random() + "";
+            var a = axel * 10000000000000;
+            var scr = document.getElementById('tracker');
+            scr.setAttribute('src', 'https://3689183.fls.doubleclick.net/activityi;src=3689183;type=acqur0;cat=immo;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ord=1;num=' + a + '?');
+            var noscript = document.getElementsByTagName("noscript")[0];
+            noscript.innerHTML = '<iframe src="https://3689183.fls.doubleclick.net/activityi;src=3689183;type=acqur0;cat=immo;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=${GDPR};gdpr_consent=${GDPR_CONSENT_755};ord=1;num=1?" width="1" height="1" frameborder="0" style="display:none"></iframe>';
+        },
+        cookieRemovedCookie () {
+            console.log('here in cookieRemoved')
+            this.status = null
+            this.$refs.cookieConsent.init()
+        },
+        removeCookie () {
+            console.log('Cookie removed')
+            this.$refs.cookieConsent.removeCookie()
         }
     },
     computed: {
@@ -467,7 +524,7 @@ i {
 	width            : 100%;
 }
 
-.section {;
+.section {
 	font-family    : 'Nunito Sans', sans-serif;
 	font-size      : 16px;
 	font-stretch   : normal;
@@ -636,5 +693,46 @@ footer div.version {
 .bouton svg.end {
 	color  : #FFFFFF;
 	margin : 0 0 0 10px;
+}
+
+#cookieConsent {
+    background: rgba(35,35,35, 0.95);
+    color: #f2f2f2;
+    font-weight: bold;
+}
+
+#cookieConsent button {
+    font-weight: bold;
+}
+
+#cookieConsent .cookie__bar__wrap {
+    max-width: 900px;
+    margin: auto;
+    padding: 8px 0;
+}
+
+.removeCookie {
+    background-color: transparent;
+    color: #373C42 !important;
+    text-decoration: none !important;
+    text-align: left;
+    line-height: 1.5rem;
+    font-size: 16px;
+    font-family: "Avenir", Helvetica, Arial, sans-serif;
+    border: none;
+    padding: 0;
+    font-weight: bold;
+}
+
+#cookieConsent .cookie__bar__content {
+    margin-right: 1rem;
+}
+
+#cookieConsent .cookie__bar__buttons__button--accept:hover {
+    background: #02be09;
+}
+
+#cookieConsent .cookie__bar__buttons__button--decline:hover {
+    background: #f14336;
 }
 </style>

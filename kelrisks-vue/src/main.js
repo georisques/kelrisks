@@ -32,8 +32,14 @@ import {
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import moment from 'moment'
 
+
 import {Icon} from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+
+import 'vue-cookie-accept-decline/dist/vue-cookie-accept-decline.css'
+ 
+import VueCookieAcceptDecline from 'vue-cookie-accept-decline'
+Vue.component('vue-cookie-accept-decline', VueCookieAcceptDecline)
 
 // Leaflet
 // this part resolve an issue where the markers would not appear
@@ -49,6 +55,7 @@ Icon.Default.mergeOptions({
 library.add(faUser, faCopy, faInfo, faThumbsUp, faBomb, faExclamation, faBriefcase, faChevronLeft, faTruckMoving, faChevronRight, faSearch, faSpinner, faUndo, faCheck, faTimes, faExclamationTriangle, faFilePdf, faCaretDown, faCaretUp, faCheckCircle, faMapMarkedAlt, faHome)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
+
 // Vue Material @ https://vuematerial.io/getting-started
 // Vue.use(VueMaterial)
 
@@ -59,6 +66,8 @@ Vue.filter('formatDate', function (value, format) {
         return moment(String(value)).format(format)
     }
 })
+
+
 
 /* eslint-disable no-new */
 new Vue({

@@ -21,6 +21,7 @@
     "moment": "2.26.0",
     "turf-extent": "1.0.4",
     "vue": "2.6.11",
+    "vue-cookie-accept-decline": "^5.4.0",
     "vue-router": "3.3.2",
     "vue2-leaflet": "2.5.2"
   },

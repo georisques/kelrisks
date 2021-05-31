@@ -102,8 +102,7 @@
 
             <div id="bottomButtonsWrapper">
                 <a @click="download"
-                   class="bouton success"
-                   target="_blank">
+                   class="bouton success">
                     Télécharger l'état des risques
                     <font-awesome-icon class="end"
                                        icon="chevron-right"/>

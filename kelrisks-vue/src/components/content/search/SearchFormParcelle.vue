@@ -92,7 +92,7 @@
                     </div>
 
                     <div id="cgu">
-                        <p>En poursuivant votre navigation, vous acceptez nos <a href="https://www.georisques.gouv.fr/cgu" rel="noopener" target="_blank">CGU</a>.</p>
+                        <p>En poursuivant votre navigation, vous acceptez nos <a href="https://www.georisques.gouv.fr/cgu" rel="noopener" target="_blank" title="Conditions générales d’utilisation">CGU</a>.</p>
                     </div>
                 </div>
 
